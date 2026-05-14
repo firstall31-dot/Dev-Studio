@@ -202,8 +202,7 @@ function Index() {
                   <Link
                     key={a.label}
                     to={a.to}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    search={(a as any).search}
+                    search={a.search as any}
                     className={`group p-5 rounded-lg border bg-gradient-to-br ${a.color} hover:opacity-90 transition-opacity`}
                   >
                     <Icon className={`size-5 ${a.iconColor} mb-3`} />
