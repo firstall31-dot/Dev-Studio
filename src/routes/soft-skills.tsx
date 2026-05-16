@@ -1,24 +1,24 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { SoftSkillView } from "@/components/soft-skills/soft-skill-view";
-import { PageHeader, PageContainer, TabNav } from "@/components/layout";
-import { MessageCircle, Users, Lightbulb, Clock, Target, Sparkles } from "lucide-react";
+import { PageHeader, PageContainer } from "@/components/layout";
 import { z } from "zod";
 
 const searchSchema = z.object({
   tab: z
-    .enum(["communication", "leadership", "problem-solving", "teamwork", "time", "growth"])
+    .enum([
+      "communication",
+      "speaking",
+      "negotiation",
+      "leadership",
+      "problem-solving",
+      "teamwork",
+      "time",
+      "growth",
+      "mental-models",
+    ])
     .optional()
     .default("communication"),
 });
-
-const SOFT_TABS = [
-  { id: "communication", label: "Communication", icon: MessageCircle },
-  { id: "leadership", label: "Leadership", icon: Users },
-  { id: "problem-solving", label: "Problem Solving", icon: Lightbulb },
-  { id: "teamwork", label: "Teamwork", icon: Target },
-  { id: "time", label: "Time Management", icon: Clock },
-  { id: "growth", label: "Growth Mindset", icon: Sparkles },
-] as const;
 
 export const Route = createFileRoute("/soft-skills")({
   validateSearch: (search) => searchSchema.parse(search),
@@ -36,7 +36,6 @@ export const Route = createFileRoute("/soft-skills")({
 
 function SoftSkillsPage() {
   const { tab } = useSearch({ from: "/soft-skills" });
-  const navigate = Route.useNavigate();
 
   return (
     <PageContainer>

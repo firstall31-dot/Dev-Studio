@@ -106,7 +106,7 @@ function MailsPage() {
               channel={tab}
               activeTemplate={activeMail}
               onUpdateTemplate={handleUpdateMail}
-              onSave={() => console.log("Synced to Supabase!")}
+              onSave={() => console.log("Saved!")}
             />
           </div>
         </SplitLayout>

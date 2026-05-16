@@ -209,28 +209,26 @@ export const useForge = create<ForgeState>()(
 
       upsertPrompt: async (p) => {
         const previous = get().prompts;
-        set((s) => ({ 
-          prompts: s.prompts.some(x => x.id === p.id) 
-            ? s.prompts.map((x: any) => x.id === p.id ? p : x) 
-            : [p, ...s.prompts] 
+        set((s) => ({
+          prompts: s.prompts.some(x => x.id === p.id)
+            ? s.prompts.map((x: any) => x.id === p.id ? p : x)
+            : [p, ...s.prompts]
         }));
-        
-        toast.promise(
-          db.upsertPrompt({ 
-            ...p, 
-            usage_count: p.usageCount, 
-            versions: p.versions as unknown as Json, 
-            user_id: '' 
-          }),
-          {
-            loading: 'Saving prompt...',
-            success: 'Prompt saved!',
-            error: (err) => {
-              set({ prompts: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertPrompt({
+            ...p,
+            usage_count: p.usageCount,
+            versions: p.versions as unknown as Json,
+            user_id: ''
+          });
+          if (saved?.id && saved.id !== p.id) {
+            set((s) => ({ prompts: s.prompts.map(x => x.id === p.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Prompt saved!');
+        } catch (err: any) {
+          set({ prompts: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deletePrompt: async (id) => {
         const previous = get().prompts;
@@ -259,23 +257,21 @@ export const useForge = create<ForgeState>()(
 
       upsertAgent: async (a) => {
         const previous = get().agents;
-        set((s) => ({ 
-          agents: s.agents.some(x => x.id === a.id) 
-            ? s.agents.map((x: any) => x.id === a.id ? a : x) 
-            : [a, ...s.agents] 
+        set((s) => ({
+          agents: s.agents.some(x => x.id === a.id)
+            ? s.agents.map((x: any) => x.id === a.id ? a : x)
+            : [a, ...s.agents]
         }));
-
-        toast.promise(
-          db.upsertAgent({ ...a, system_prompt: a.systemPrompt, user_id: '' }),
-          {
-            loading: 'Saving agent...',
-            success: 'Agent saved!',
-            error: (err) => {
-              set({ agents: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertAgent({ ...a, system_prompt: a.systemPrompt, user_id: '' });
+          if (saved?.id && saved.id !== a.id) {
+            set((s) => ({ agents: s.agents.map(x => x.id === a.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Agent saved!');
+        } catch (err: any) {
+          set({ agents: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteAgent: async (id) => {
         const previous = get().agents;
@@ -296,23 +292,21 @@ export const useForge = create<ForgeState>()(
 
       upsertComponent: async (c) => {
         const previous = get().components;
-        set((s) => ({ 
-          components: s.components.some(x => x.id === c.id) 
-            ? s.components.map((x: any) => x.id === c.id ? c : x) 
-            : [c, ...s.components] 
+        set((s) => ({
+          components: s.components.some(x => x.id === c.id)
+            ? s.components.map((x: any) => x.id === c.id ? c : x)
+            : [c, ...s.components]
         }));
-
-        toast.promise(
-          db.upsertComponent({ ...c, usage_count: c.usageCount, user_id: '' }),
-          {
-            loading: 'Saving component...',
-            success: 'Component saved!',
-            error: (err) => {
-              set({ components: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertComponent({ ...c, usage_count: c.usageCount, user_id: '' });
+          if (saved?.id && saved.id !== c.id) {
+            set((s) => ({ components: s.components.map(x => x.id === c.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Component saved!');
+        } catch (err: any) {
+          set({ components: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteComponent: async (id) => {
         const previous = get().components;
@@ -337,23 +331,21 @@ export const useForge = create<ForgeState>()(
 
       upsertSnippet: async (snip) => {
         const previous = get().snippets;
-        set((s) => ({ 
-          snippets: s.snippets.some(x => x.id === snip.id) 
-            ? s.snippets.map((x: any) => x.id === snip.id ? snip : x) 
-            : [snip, ...s.snippets] 
+        set((s) => ({
+          snippets: s.snippets.some(x => x.id === snip.id)
+            ? s.snippets.map((x: any) => x.id === snip.id ? snip : x)
+            : [snip, ...s.snippets]
         }));
-
-        toast.promise(
-          db.upsertSnippet({ ...snip, user_id: '' }),
-          {
-            loading: 'Saving snippet...',
-            success: 'Snippet saved!',
-            error: (err) => {
-              set({ snippets: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertSnippet({ ...snip, user_id: '' });
+          if (saved?.id && saved.id !== snip.id) {
+            set((s) => ({ snippets: s.snippets.map(x => x.id === snip.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Snippet saved!');
+        } catch (err: any) {
+          set({ snippets: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteSnippet: async (id) => {
         const previous = get().snippets;
@@ -374,23 +366,21 @@ export const useForge = create<ForgeState>()(
 
       upsertConnector: async (conn) => {
         const previous = get().connectors;
-        set((s) => ({ 
-          connectors: s.connectors.some(x => x.id === conn.id) 
-            ? s.connectors.map((x: any) => x.id === conn.id ? conn : x) 
-            : [conn, ...s.connectors] 
+        set((s) => ({
+          connectors: s.connectors.some(x => x.id === conn.id)
+            ? s.connectors.map((x: any) => x.id === conn.id ? conn : x)
+            : [conn, ...s.connectors]
         }));
-
-        toast.promise(
-          db.upsertConnector({ ...conn, user_id: '', type: conn.type as "github" | "google" | "discord" | "slack" }),
-          {
-            loading: 'Saving connector...',
-            success: 'Connector saved!',
-            error: (err) => {
-              set({ connectors: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertConnector({ ...conn, user_id: '', type: conn.type as "github" | "google" | "discord" | "slack" });
+          if (saved?.id && saved.id !== conn.id) {
+            set((s) => ({ connectors: s.connectors.map(x => x.id === conn.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Connector saved!');
+        } catch (err: any) {
+          set({ connectors: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteConnector: async (id) => {
         const previous = get().connectors;
@@ -411,23 +401,21 @@ export const useForge = create<ForgeState>()(
 
       upsertSocialDraft: async (soc) => {
         const previous = get().socialDrafts;
-        set((s) => ({ 
-          socialDrafts: s.socialDrafts.some(x => x.id === soc.id) 
-            ? s.socialDrafts.map((x: any) => x.id === soc.id ? soc : x) 
-            : [soc, ...s.socialDrafts] 
+        set((s) => ({
+          socialDrafts: s.socialDrafts.some(x => x.id === soc.id)
+            ? s.socialDrafts.map((x: any) => x.id === soc.id ? soc : x)
+            : [soc, ...s.socialDrafts]
         }));
-
-        toast.promise(
-          db.upsertSocialDraft({ ...soc, user_id: '', platform: (soc.platform as string) || "linkedin", media_urls: soc.mediaUrls || [] }),
-          {
-            loading: 'Saving draft...',
-            success: 'Draft saved!',
-            error: (err) => {
-              set({ socialDrafts: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertSocialDraft({ ...soc, user_id: '', platform: (soc.platform as string) || "linkedin", media_urls: soc.mediaUrls || [] });
+          if (saved?.id && saved.id !== soc.id) {
+            set((s) => ({ socialDrafts: s.socialDrafts.map(x => x.id === soc.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Draft saved!');
+        } catch (err: any) {
+          set({ socialDrafts: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteSocialDraft: async (id) => {
         const previous = get().socialDrafts;
@@ -448,23 +436,21 @@ export const useForge = create<ForgeState>()(
 
       upsertMailTemplate: async (mail) => {
         const previous = get().mailTemplates;
-        set((s) => ({ 
-          mailTemplates: s.mailTemplates.some(x => x.id === mail.id) 
-            ? s.mailTemplates.map((x: any) => x.id === mail.id ? mail : x) 
-            : [mail, ...s.mailTemplates] 
+        set((s) => ({
+          mailTemplates: s.mailTemplates.some(x => x.id === mail.id)
+            ? s.mailTemplates.map((x: any) => x.id === mail.id ? mail : x)
+            : [mail, ...s.mailTemplates]
         }));
-
-        toast.promise(
-          db.upsertMailTemplate({ ...mail, user_id: '', channel: mail.channel as "email" | "sms" | "whatsapp" }),
-          {
-            loading: 'Saving template...',
-            success: 'Template saved!',
-            error: (err) => {
-              set({ mailTemplates: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertMailTemplate({ ...mail, user_id: '', channel: mail.channel as "email" | "sms" | "whatsapp" });
+          if (saved?.id && saved.id !== mail.id) {
+            set((s) => ({ mailTemplates: s.mailTemplates.map(x => x.id === mail.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Template saved!');
+        } catch (err: any) {
+          set({ mailTemplates: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteMailTemplate: async (id) => {
         const previous = get().mailTemplates;
@@ -492,23 +478,21 @@ export const useForge = create<ForgeState>()(
       // Placeholder for remaining methods
       upsertTemplate: async (t) => {
         const previous = get().templates;
-        set((s) => ({ 
-          templates: s.templates.some(x => x.id === t.id) 
-            ? s.templates.map((x: any) => x.id === t.id ? t : x) 
-            : [t, ...s.templates] 
+        set((s) => ({
+          templates: s.templates.some(x => x.id === t.id)
+            ? s.templates.map((x: any) => x.id === t.id ? t : x)
+            : [t, ...s.templates]
         }));
-
-        toast.promise(
-          db.upsertTemplate({ ...t, user_id: '' }),
-          {
-            loading: 'Saving template...',
-            success: 'Template saved!',
-            error: (err) => {
-              set({ templates: previous });
-              return `Failed to save: ${err.message}`;
-            }
+        try {
+          const saved = await db.upsertTemplate({ ...t, user_id: '' });
+          if (saved?.id && saved.id !== t.id) {
+            set((s) => ({ templates: s.templates.map(x => x.id === t.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Template saved!');
+        } catch (err: any) {
+          set({ templates: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteTemplate: async (id) => {
         const previous = get().templates;
@@ -528,28 +512,26 @@ export const useForge = create<ForgeState>()(
       },
       upsertInterviewQuestion: async (q) => {
         const previous = get().interviewQuestions;
-        set((s) => ({ 
-          interviewQuestions: s.interviewQuestions.some(x => x.id === q.id) 
-            ? s.interviewQuestions.map((x: any) => x.id === q.id ? q : x) 
-            : [q, ...s.interviewQuestions] 
+        set((s) => ({
+          interviewQuestions: s.interviewQuestions.some(x => x.id === q.id)
+            ? s.interviewQuestions.map((x: any) => x.id === q.id ? q : x)
+            : [q, ...s.interviewQuestions]
         }));
-
-        toast.promise(
-          db.upsertInterviewQuestion({ 
-            ...q, 
-            user_id: '', 
+        try {
+          const saved = await db.upsertInterviewQuestion({
+            ...q,
+            user_id: '',
             domain: (q.area || q.category || 'frontend'),
             tags: q.tags || []
-          }),
-          {
-            loading: 'Saving question...',
-            success: 'Question saved!',
-            error: (err) => {
-              set({ interviewQuestions: previous });
-              return `Failed to save: ${err.message}`;
-            }
+          });
+          if (saved?.id && saved.id !== q.id) {
+            set((s) => ({ interviewQuestions: s.interviewQuestions.map(x => x.id === q.id ? { ...x, id: saved.id } : x) }));
           }
-        );
+          toast.success('Question saved!');
+        } catch (err: any) {
+          set({ interviewQuestions: previous });
+          toast.error(`Failed to save: ${err.message}`);
+        }
       },
       deleteInterviewQuestion: async (id) => {
         const previous = get().interviewQuestions;
@@ -604,21 +586,18 @@ export const useForge = create<ForgeState>()(
           domain: q.area || q.category || 'frontend',
           answer_depths: (q.answerDepths || []) as unknown as Json
         }));
-        const connectorsData = seedConnectors.map(({ id, ...c }) => ({
+        const connectorsData = seedConnectors.map(({ id: _id, ...c }) => ({
           ...c,
           user_id: 'local',
-          id,
         }));
-        const socialDraftsData = seedSocialDrafts.map(({ id, ...d }) => ({
+        const socialDraftsData = seedSocialDrafts.map(({ id: _id, ...d }) => ({
           ...d,
           media_urls: d.mediaUrls,
           user_id: 'local',
-          id,
         }));
-        const mailTemplatesData = seedMailTemplates.map(({ id, ...m }) => ({
+        const mailTemplatesData = seedMailTemplates.map(({ id: _id, ...m }) => ({
           ...m,
           user_id: 'local',
-          id,
         }));
 
         try {
@@ -758,13 +737,13 @@ export const useForge = create<ForgeState>()(
         const state = get();
 
         const connectorsData = state.connectors.length === 0
-          ? seedConnectors.map(({ id, ...c }) => ({ ...c, user_id: 'local', id }))
+          ? seedConnectors.map(({ id: _id, ...c }) => ({ ...c, user_id: 'local' }))
           : [];
         const socialDraftsData = state.socialDrafts.length === 0
-          ? seedSocialDrafts.map(({ id, ...d }) => ({ ...d, media_urls: d.mediaUrls, user_id: 'local', id }))
+          ? seedSocialDrafts.map(({ id: _id, ...d }) => ({ ...d, media_urls: d.mediaUrls, user_id: 'local' }))
           : [];
         const mailTemplatesData = state.mailTemplates.length === 0
-          ? seedMailTemplates.map(({ id, ...m }) => ({ ...m, user_id: 'local', id }))
+          ? seedMailTemplates.map(({ id: _id, ...m }) => ({ ...m, user_id: 'local' }))
           : [];
 
         try {
@@ -814,7 +793,7 @@ export const useForge = create<ForgeState>()(
         }
       },
     }),
-    { name: "forgedev-store-supabase-v2" },
+    { name: "forgedev-store-v2" },
   ),
 );
 
@@ -822,6 +801,6 @@ export function fillVariables(body: string, values: Record<string, string>) {
   return body.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => values[k] ?? `{{${k}}}`);
 }
 
-export function newId(prefix: string) {
-  return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+export function newId(_prefix?: string) {
+  return crypto.randomUUID();
 }

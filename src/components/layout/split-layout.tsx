@@ -1,13 +1,13 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUIStore } from "@/lib/ui-store";
 
 interface SplitLayoutProps {
   sidebar: React.ReactNode;
   children: React.ReactNode;
   sidebarWidth?: string;
   className?: string;
-  defaultOpen?: boolean;
 }
 
 export function SplitLayout({
@@ -15,18 +15,9 @@ export function SplitLayout({
   children,
   sidebarWidth = "w-64",
   className = "",
-  defaultOpen = false,
 }: SplitLayoutProps) {
-  const [isOpen, setIsOpen] = React.useState(defaultOpen);
+  const { sidebarOpen: isOpen, toggleSidebar } = useUIStore();
 
-  // Close sidebar on mobile by default
-  React.useEffect(() => {
-    if (window.innerWidth < 768) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  // Ensure there's a base width if only responsive widths are provided
   const sidebarWidthClass = React.useMemo(() => {
     const hasBaseWidth =
       /(^|\s)w-([^\d]|\[)/.test(sidebarWidth) || /(^|\s)w-\d+/.test(sidebarWidth);
@@ -36,7 +27,6 @@ export function SplitLayout({
     return sidebarWidth;
   }, [sidebarWidth]);
 
-  // Extract numeric value for the toggle button position and inner content width
   const widthValue = React.useMemo(() => {
     const bracketMatch = sidebarWidthClass.match(/\[(.*?)\]/);
     let baseWidth = "288px";
@@ -53,8 +43,6 @@ export function SplitLayout({
       baseWidth = "240px";
     }
 
-    // On mobile, ensure sidebar doesn't take more than 70% of width
-    // This provides a more balanced view on very narrow screens
     return `min(${baseWidth}, 70vw)`;
   }, [sidebarWidthClass]);
 
@@ -63,7 +51,6 @@ export function SplitLayout({
       className={cn("flex h-full min-h-0 bg-background relative overflow-hidden", className)}
       style={{ "--sidebar-width": widthValue } as React.CSSProperties}
     >
-      {/* Sidebar - Pushes content, no overlay */}
       <aside
         className={cn(
           "flex flex-col shrink-0 border-r border-border bg-muted/10 transition-[width] duration-300 ease-in-out overflow-hidden relative",
@@ -79,15 +66,12 @@ export function SplitLayout({
           style={{ width: "var(--sidebar-width)" }}
         >
           {sidebar}
-          
-          {/* Bottom mask indicator - purely visual polish */}
           <div className="sticky bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-muted/5 to-transparent pointer-events-none z-10 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-500" />
         </div>
       </aside>
 
-      {/* Unified Toggle Button - Works on all screens */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleSidebar}
         className={cn(
           "grid place-items-center absolute top-20 z-30 size-6 rounded-full border border-border bg-background shadow-sm hover:bg-accent hover:scale-105 active:scale-95 transition-all duration-300 group",
           isOpen ? "left-[calc(var(--sidebar-width)-12px)]" : "left-3",

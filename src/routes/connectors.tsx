@@ -108,7 +108,7 @@ function ConnectorsPage() {
               type={tab}
               activeConnector={activeConnector}
               onUpdateConnector={handleUpdateConnector}
-              onSave={() => console.log("Synced to Supabase!")}
+              onSave={() => console.log("Saved!")}
             />
           </div>
         </SplitLayout>

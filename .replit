@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "bash"]
+modules = ["nodejs-20", "web"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -44,6 +44,7 @@ localPort = 24678
 externalPort = 3001
 
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+run = ["node", "--import", "tsx/esm", "server.ts"]

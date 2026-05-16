@@ -106,7 +106,7 @@ function SocialPage() {
               platform={tab}
               activeDraft={activeDraft}
               onUpdateDraft={handleUpdateDraft}
-              onSave={() => console.log("Synced to Supabase!")}
+              onSave={() => console.log("Saved!")}
             />
           </div>
         </SplitLayout>

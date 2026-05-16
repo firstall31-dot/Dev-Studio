@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, CheckSquare, ExternalLink, GraduationCap, ChevronRight, Search } from "lucide-react";
 import type { SkillAreaData } from "@/types/skills";
 import { OverviewSection } from "./overview-section";
@@ -25,21 +25,24 @@ export function SkillArea({
   activeSubArea?: string;
 }) {
   const [activeSection, setActiveSection] = useState<SectionId>("overview");
-  const [internalSubArea, setInternalSubArea] = useState<string>(data.subAreas?.[0]?.id || "");
+  const [subArea, setSubArea] = useState<string>(
+    activeSubArea || data.subAreas?.[0]?.id || "",
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
-  const subArea = activeSubArea || internalSubArea;
-  const setSubArea = (id: string) => setInternalSubArea(id);
+  useEffect(() => {
+    if (activeSubArea) {
+      setSubArea(activeSubArea);
+    }
+  }, [activeSubArea]);
 
-  const filteredSubAreas = data.subAreas?.filter(sa => 
+  const filteredSubAreas = data.subAreas?.filter(sa =>
     sa.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const sidebar = (
     <div className="h-full flex flex-col min-h-0">
-      {/* Sticky Top Section */}
       <div className="p-6 pb-2 sticky top-0 bg-background/80 backdrop-blur-md z-20 space-y-6">
-        {/* Area identity */}
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
             <data.icon className="size-5" />
@@ -52,7 +55,6 @@ export function SkillArea({
           </div>
         </div>
 
-        {/* Section nav */}
         <nav className="space-y-1">
           {SECTIONS.map((s) => {
             const Icon = s.icon;
@@ -76,7 +78,6 @@ export function SkillArea({
           })}
         </nav>
 
-        {/* Search */}
         {data.subAreas && (
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -92,7 +93,6 @@ export function SkillArea({
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-thin">
-        {/* Sub-areas (stacks / topics) */}
         {data.subAreas && (
           <div className="mt-2">
             <h4 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground px-3 mb-3 sticky top-0 bg-background/80 backdrop-blur-sm py-1 z-10">
