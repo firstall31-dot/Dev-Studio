@@ -53,14 +53,14 @@ export function SplitLayout({
     >
       <aside
         className={cn(
-          "flex flex-col shrink-0 border-r border-border bg-muted/10 transition-[width] duration-300 ease-in-out overflow-hidden relative",
-          !isOpen && "w-0 border-r-0",
+          "flex flex-col shrink-0 transition-[width] duration-300 ease-in-out overflow-hidden relative pt-[5px] pl-[5px] pb-[5px]",
+          !isOpen && "w-0 pt-0 pl-0 pb-0",
         )}
-        style={{ width: isOpen ? "var(--sidebar-width)" : "0" }}
+        style={{ width: isOpen ? "calc(var(--sidebar-width) + 5px)" : "0" }}
       >
         <div
           className={cn(
-            "flex-1 flex flex-col transition-opacity duration-200 overflow-x-hidden relative group/sidebar",
+            "flex-1 flex flex-col transition-opacity duration-200 overflow-hidden relative group/sidebar rounded-xl border border-border bg-muted/10",
             isOpen ? "opacity-100 delay-150" : "opacity-0 pointer-events-none",
           )}
           style={{ width: "var(--sidebar-width)" }}
