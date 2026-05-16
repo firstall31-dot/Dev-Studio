@@ -158,7 +158,14 @@ export function setupGooglePassport() {
   });
 }
 
-router.get("/google", passport.authenticate("google", { session: false, scope: ["profile", "email"] }));
+router.get("/google", (req: Request, res: Response, next: NextFunction) => {
+  const clientID = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientID || !clientSecret) {
+    return res.redirect("/auth?error=google_not_configured");
+  }
+  passport.authenticate("google", { session: false, scope: ["profile", "email"] })(req, res, next);
+});
 
 router.get("/google/callback",
   passport.authenticate("google", { session: false, failureRedirect: "/auth?error=google_failed" }),

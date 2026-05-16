@@ -1,5 +1,6 @@
 import type { Prompt, Agent, ComponentAsset, Template, Snippet, Connector, SocialDraft, MailTemplate } from "../../types/tools";
 import type { InterviewQuestion } from "../../types/skills";
+import type { CVProfile } from "../../types/cv";
 
 export interface ForgeState {
   prompts: Prompt[];
@@ -11,6 +12,7 @@ export interface ForgeState {
   connectors: Connector[];
   socialDrafts: SocialDraft[];
   mailTemplates: MailTemplate[];
+  cvProfiles: CVProfile[];
   userProgress: Record<string, boolean>;
   isLoading: boolean;
   initialized: boolean;
@@ -43,6 +45,9 @@ export interface ForgeState {
 
   upsertMailTemplate: (m: MailTemplate) => Promise<void>;
   deleteMailTemplate: (id: string) => Promise<void>;
+
+  upsertCVProfile: (cv: CVProfile) => Promise<void>;
+  deleteCVProfile: (id: string) => Promise<void>;
 
   toggleProgress: (itemId: string, areaId: string) => Promise<void>;
   

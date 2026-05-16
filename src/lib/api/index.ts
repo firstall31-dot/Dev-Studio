@@ -6,3 +6,4 @@ export * from "./agents.js";
 export * from "./components.js";
 export * from "./integrations.js";
 export * from "./interview.js";
+export * from "./cv.js";

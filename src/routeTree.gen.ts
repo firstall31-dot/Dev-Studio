@@ -18,6 +18,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MailsRouteImport } from './routes/mails'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as InterviewRouteImport } from './routes/interview'
+import { Route as CvRouteImport } from './routes/cv'
 import { Route as ConnectorsRouteImport } from './routes/connectors'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -67,6 +68,11 @@ const InterviewRoute = InterviewRouteImport.update({
   path: '/interview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CvRoute = CvRouteImport.update({
+  id: '/cv',
+  path: '/cv',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnectorsRoute = ConnectorsRouteImport.update({
   id: '/connectors',
   path: '/connectors',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/connectors': typeof ConnectorsRoute
+  '/cv': typeof CvRoute
   '/interview': typeof InterviewRoute
   '/jobs': typeof JobsRoute
   '/mails': typeof MailsRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/connectors': typeof ConnectorsRoute
+  '/cv': typeof CvRoute
   '/interview': typeof InterviewRoute
   '/jobs': typeof JobsRoute
   '/mails': typeof MailsRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/connectors': typeof ConnectorsRoute
+  '/cv': typeof CvRoute
   '/interview': typeof InterviewRoute
   '/jobs': typeof JobsRoute
   '/mails': typeof MailsRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/connectors'
+    | '/cv'
     | '/interview'
     | '/jobs'
     | '/mails'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/connectors'
+    | '/cv'
     | '/interview'
     | '/jobs'
     | '/mails'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/connectors'
+    | '/cv'
     | '/interview'
     | '/jobs'
     | '/mails'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   ConnectorsRoute: typeof ConnectorsRoute
+  CvRoute: typeof CvRoute
   InterviewRoute: typeof InterviewRoute
   JobsRoute: typeof JobsRoute
   MailsRoute: typeof MailsRoute
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InterviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cv': {
+      id: '/cv'
+      path: '/cv'
+      fullPath: '/cv'
+      preLoaderRoute: typeof CvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connectors': {
       id: '/connectors'
       path: '/connectors'
@@ -279,6 +299,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   ConnectorsRoute: ConnectorsRoute,
+  CvRoute: CvRoute,
   InterviewRoute: InterviewRoute,
   JobsRoute: JobsRoute,
   MailsRoute: MailsRoute,

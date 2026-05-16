@@ -7,6 +7,7 @@ import { createAgentSlice } from "./slices/agents";
 import { createComponentSlice } from "./slices/components";
 import { createIntegrationSlice } from "./slices/integrations";
 import { createInterviewSlice } from "./slices/interview";
+import { createCVSlice } from "./slices/cv";
 
 export const useForge = create<ForgeState>()(
   persist(
@@ -20,6 +21,7 @@ export const useForge = create<ForgeState>()(
       connectors: [],
       socialDrafts: [],
       mailTemplates: [],
+      cvProfiles: [],
       userProgress: {},
       isLoading: false,
       initialized: false,
@@ -29,6 +31,7 @@ export const useForge = create<ForgeState>()(
       ...createComponentSlice(...a),
       ...createIntegrationSlice(...a),
       ...createInterviewSlice(...a),
+      ...createCVSlice(...a),
     } as ForgeState),
     {
       name: "forgedev-store-v3",

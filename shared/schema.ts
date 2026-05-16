@@ -4,3 +4,4 @@ export * from "./schema/career.js";
 export * from "./schema/learning.js";
 export * from "./schema/profile.js";
 export * from "./schema/auth.js";
+export * from "./schema/cv.js";

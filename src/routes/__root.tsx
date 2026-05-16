@@ -20,7 +20,14 @@ function RootComponent() {
       <AuthProvider>
         <AuthGate />
       </AuthProvider>
-      <Toaster richColors position="top-right" />
+      <Toaster
+        richColors
+        position="top-right"
+        closeButton
+        expand={false}
+        visibleToasts={5}
+        toastOptions={{ duration: 4000 }}
+      />
     </QueryClientProvider>
   );
 }

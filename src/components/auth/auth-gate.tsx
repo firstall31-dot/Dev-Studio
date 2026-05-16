@@ -3,6 +3,7 @@ import { Outlet, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { useForge } from "@/lib/store";
 
 const PUBLIC_ROUTES = ["/auth"];
@@ -20,16 +21,18 @@ export function AuthGate() {
   const [loadingTime, setLoadingTime] = useState(0);
 
   useEffect(() => {
+    if (isReady && user) {
+      init();
+    }
+  }, [isReady, user, init]);
+
+  useEffect(() => {
     if (isReady && !user && !isPublic) {
       router.navigate({ to: "/auth", replace: true }).catch((err) => {
         console.error("[AuthGate] Navigation to /auth failed:", err);
       });
     }
-
-    if (isReady && user) {
-      init();
-    }
-  }, [isReady, user, isPublic, router, pathname, init]);
+  }, [isReady, user, isPublic, router, pathname]);
 
   useEffect(() => {
     if (!isReady) {
@@ -60,7 +63,7 @@ export function AuthGate() {
   }
 
   if (isPublic) {
-    return <Outlet />;
+    return <ErrorBoundary><Outlet /></ErrorBoundary>;
   }
 
   if (!user) {
