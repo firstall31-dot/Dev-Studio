@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
 import {
   CalendarDays, Plus, CheckCircle2, Circle, Clock,
-  LayoutGrid, Archive, ChevronDown, Sparkles, Dumbbell,
+  LayoutGrid, ChevronDown, Dumbbell,
 } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor,
@@ -35,27 +35,28 @@ export const Route = createFileRoute("/planner")({
   component: PlannerPage,
 });
 
-type Tab = "schedule" | "overview" | "backlog" | "activities";
+type Tab = "overview" | "schedule" | "activities";
 
 function getWeekStart(d: Date) {
   const r = new Date(d);
-  const day = r.getDay(); // 0=Sun … 6=Sat
-  const diff = (day - 6 + 7) % 7; // days since last Saturday
+  const day = r.getDay();
+  const diff = (day - 6 + 7) % 7;
   r.setDate(r.getDate() - diff);
   r.setHours(0, 0, 0, 0);
   return r;
 }
+
 function formatDayTitle(dateStr: string) {
-  const d  = new Date(dateStr + "T00:00:00");
-  const today    = toDateStr(new Date());
-  const tomorrow = toDateStr(addDays(new Date(), 1));
-  const yesterday= toDateStr(addDays(new Date(), -1));
+  const d         = new Date(dateStr + "T00:00:00");
+  const today     = toDateStr(new Date());
+  const tomorrow  = toDateStr(addDays(new Date(), 1));
+  const yesterday = toDateStr(addDays(new Date(), -1));
   const label =
-    dateStr === today ? "Today" :
-    dateStr === tomorrow ? "Tomorrow" :
+    dateStr === today     ? "Today"     :
+    dateStr === tomorrow  ? "Tomorrow"  :
     dateStr === yesterday ? "Yesterday" : null;
-  const weekday  = d.toLocaleDateString("en-US", { weekday: "long" });
-  const dateLabel= d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const weekday   = d.toLocaleDateString("en-US", { weekday: "long" });
+  const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return label ? `${label} — ${weekday}, ${dateLabel}` : `${weekday}, ${dateLabel}`;
 }
 
@@ -64,23 +65,15 @@ const STATUS_CYCLE: Record<TaskStatus, TaskStatus> = {
 };
 
 const TABS: { id: Tab; label: string; icon: typeof CalendarDays }[] = [
-  { id: "schedule",   label: "Schedule",   icon: CalendarDays },
   { id: "overview",   label: "Overview",   icon: LayoutGrid   },
-  { id: "backlog",    label: "Backlog",    icon: Archive      },
+  { id: "schedule",   label: "Schedule",   icon: CalendarDays },
   { id: "activities", label: "Activities", icon: Dumbbell     },
 ];
 
-/* ─────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────── */
 
 function SectionGroup({
-  category,
-  tasks,
-  onToggle,
-  onDelete,
-  onEdit,
-  onAdd,
-  date,
-  activeId,
+  category, tasks, onToggle, onDelete, onEdit, onAdd, date, activeId,
 }: {
   category: TaskCategory;
   tasks: PlannerTask[];
@@ -92,26 +85,20 @@ function SectionGroup({
   activeId: string | null;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [showAdd, setShowAdd] = useState(false);
-  const styles = CATEGORY_SECTION_STYLES[category];
-  const done = tasks.filter((t) => t.status === "done").length;
-  const pct  = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
+  const [showAdd,   setShowAdd]   = useState(false);
+  const styles   = CATEGORY_SECTION_STYLES[category];
+  const done     = tasks.filter((t) => t.status === "done").length;
+  const pct      = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
   const SectionIcon = CATEGORY_ICON_COMPONENTS[category];
 
   return (
     <div className={cn("rounded-2xl border overflow-hidden", styles.border)}>
-      {/* Section header */}
       <button
         onClick={() => setCollapsed((v) => !v)}
-        className={cn(
-          "w-full flex items-center gap-2.5 px-3.5 py-2.5 transition-colors",
-          styles.bg, "hover:brightness-[0.97]"
-        )}
+        className={cn("w-full flex items-center gap-2.5 px-3.5 py-2.5 transition-colors", styles.bg, "hover:brightness-[0.97]")}
       >
         <SectionIcon className={cn("size-4 shrink-0", styles.label)} />
-        <span className={cn("text-xs font-bold flex-1 text-left", styles.label)}>
-          {CATEGORY_LABELS[category]}
-        </span>
+        <span className={cn("text-xs font-bold flex-1 text-left", styles.label)}>{CATEGORY_LABELS[category]}</span>
         {tasks.length > 0 && (
           <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full", styles.labelBg, styles.label)}>
             {done}/{tasks.length}
@@ -125,10 +112,7 @@ function SectionGroup({
             />
           </div>
         )}
-        <ChevronDown className={cn(
-          "size-3.5 transition-transform shrink-0", styles.label,
-          collapsed && "-rotate-90"
-        )} />
+        <ChevronDown className={cn("size-3.5 transition-transform shrink-0", styles.label, collapsed && "-rotate-90")} />
       </button>
 
       {!collapsed && (
@@ -140,13 +124,7 @@ function SectionGroup({
               </p>
             ) : (
               tasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onToggle={onToggle}
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                />
+                <TaskCard key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} />
               ))
             )}
           </SortableContext>
@@ -177,17 +155,18 @@ function SectionGroup({
   );
 }
 
-/* ─────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────── */
 
 export default function PlannerPage() {
-  const [tab, setTab] = useState<Tab>("schedule");
-  const [tasks, setTasks] = useState<PlannerTask[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
+  const [tab,          setTab]          = useState<Tab>("overview");
+  const [tasks,        setTasks]        = useState<PlannerTask[]>([]);
+  const [loading,      setLoading]      = useState(true);
   const [selectedDate, setSelectedDate] = useState(() => toDateStr(new Date()));
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
-  const [editingTask, setEditingTask] = useState<PlannerTask | null>(null);
-  const [activeTask, setActiveTask] = useState<PlannerTask | null>(null);
+  const [weekStart,    setWeekStart]    = useState(() => getWeekStart(new Date()));
+  const [editingTask,  setEditingTask]  = useState<PlannerTask | null>(null);
+  const [activeTask,   setActiveTask]   = useState<PlannerTask | null>(null);
+  const [searchQuery,  setSearchQuery]  = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | TaskStatus>("all");
 
   const weekEnd = addDays(weekStart, 6);
 
@@ -206,11 +185,9 @@ export default function PlannerPage() {
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
   const handleAddTask = async (partial: Omit<PlannerTask, "id" | "createdAt" | "updatedAt">) => {
-    const safeDate = partial.date && /^\d{4}-\d{2}-\d{2}$/.test(partial.date)
-      ? partial.date
-      : selectedDate;
-    const withDate = { ...partial, date: safeDate };
-    const tempId = crypto.randomUUID();
+    const safeDate  = partial.date && /^\d{4}-\d{2}-\d{2}$/.test(partial.date) ? partial.date : selectedDate;
+    const withDate  = { ...partial, date: safeDate };
+    const tempId    = crypto.randomUUID();
     const optimistic: PlannerTask = { ...withDate, id: tempId, createdAt: Date.now(), updatedAt: Date.now() };
     setTasks((prev) => [...prev, optimistic]);
     try {
@@ -224,7 +201,7 @@ export default function PlannerPage() {
 
   const handleToggle = async (task: PlannerTask) => {
     const newStatus = STATUS_CYCLE[task.status];
-    const updated = { ...task, status: newStatus, updatedAt: Date.now() };
+    const updated   = { ...task, status: newStatus, updatedAt: Date.now() };
     setTasks((prev) => prev.map((t) => t.id === task.id ? updated : t));
     try { await upsertPlannerTask(updated); }
     catch (e: any) {
@@ -234,7 +211,7 @@ export default function PlannerPage() {
   };
 
   const handleSaveEdit = async (task: PlannerTask) => {
-    const previous = tasks.find((t) => t.id === task.id);
+    const previous   = tasks.find((t) => t.id === task.id);
     const normalized = { ...task, category: normCategory(task.category) };
     setTasks((prev) => prev.map((t) => t.id === task.id ? normalized : t));
     setEditingTask(null);
@@ -250,27 +227,6 @@ export default function PlannerPage() {
     setTasks((prev) => prev.filter((t) => t.id !== id));
     try { await deletePlannerTask(id); toast.success("Task deleted"); }
     catch (e: any) { setTasks(previous); toast.error(`Failed to delete: ${e.message}`); }
-  };
-
-  /* ── Seed ── */
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/planner/seed", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ month: selectedDate.slice(0, 7), clear: false }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const { count } = await res.json();
-      toast.success(`Seeded ${count} sample tasks for this month!`);
-      await fetchTasks();
-    } catch (e: any) {
-      toast.error(`Seed failed: ${e.message}`);
-    } finally {
-      setSeeding(false);
-    }
   };
 
   /* ── DnD ── */
@@ -308,28 +264,34 @@ export default function PlannerPage() {
     catch { toast.error("Failed to save order"); fetchTasks(); }
   };
 
-  const handlePrevWeek  = () => setWeekStart((w) => addDays(w, -7));
-  const handleNextWeek  = () => setWeekStart((w) => addDays(w, 7));
-  const handleToday     = () => {
+  const handlePrevWeek   = () => setWeekStart((w) => addDays(w, -7));
+  const handleNextWeek   = () => setWeekStart((w) => addDays(w, 7));
+  const handleToday      = () => {
     const today = new Date();
     setSelectedDate(toDateStr(today));
     setWeekStart(getWeekStart(today));
   };
   const handleSelectDate = (date: string) => {
-    setSelectedDate(date); setTab("schedule");
+    setSelectedDate(date);
+    setTab("schedule");
   };
 
   /* ── Derived data ── */
   const dayTasks = tasks.filter((t) => t.date === selectedDate);
+
+  const filteredDayTasks = dayTasks.filter((t) => {
+    const matchSearch = !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchStatus = statusFilter === "all" || t.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
   const bySection = (cat: TaskCategory) =>
-    dayTasks.filter((t) => t.category === cat).sort((a, b) => a.order - b.order);
+    filteredDayTasks.filter((t) => t.category === cat).sort((a, b) => a.order - b.order);
 
-  const backlogTasks = tasks.filter((t) => !t.date || t.date === "");
-  const totalCount   = dayTasks.length;
-  const doneCount    = dayTasks.filter((t) => t.status === "done").length;
-  const completionPct= totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
-
-  const weekTheme = getWeekTheme(selectedDate);
+  const totalCount    = dayTasks.length;
+  const doneCount     = dayTasks.filter((t) => t.status === "done").length;
+  const completionPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+  const weekTheme     = getWeekTheme(selectedDate);
 
   /* ── Sidebar ── */
   const plannerSidebar = (
@@ -343,6 +305,10 @@ export default function PlannerPage() {
       onToday={handleToday}
       onAddTask={() => setTab("schedule")}
       weekTheme={weekTheme}
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      statusFilter={statusFilter}
+      onStatusFilterChange={setStatusFilter}
     />
   );
 
@@ -359,11 +325,11 @@ export default function PlannerPage() {
             <h1 className="text-lg sm:text-xl font-semibold tracking-tight leading-tight">Planner</h1>
           </div>
 
+          {/* Desktop tabs */}
           <nav className="hidden sm:flex items-center gap-1 p-1 bg-muted/40 rounded-xl border border-border/50 ml-2">
             {TABS.map((t) => {
-              const Icon = t.icon;
+              const Icon   = t.icon;
               const active = tab === t.id;
-              const badge  = t.id === "backlog" ? backlogTasks.length : undefined;
               return (
                 <button
                   key={t.id}
@@ -377,28 +343,12 @@ export default function PlannerPage() {
                 >
                   <Icon className={cn("size-3.5 shrink-0", active && "text-primary")} />
                   {t.label}
-                  {badge != null && badge > 0 && (
-                    <span className={cn(
-                      "min-w-[16px] text-center text-[10px] leading-none px-1 py-0.5 rounded-full",
-                      active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                    )}>{badge}</span>
-                  )}
                 </button>
               );
             })}
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
-            {dayTasks.length === 0 && !loading && tab === "schedule" && (
-              <button
-                onClick={handleSeed}
-                disabled={seeding}
-                className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold px-3 py-2 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 transition-all disabled:opacity-50"
-              >
-                <Sparkles className="size-3.5" />
-                {seeding ? "Seeding…" : "Seed sample month"}
-              </button>
-            )}
             <button
               onClick={() => setTab("schedule")}
               className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-2 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-sm shrink-0"
@@ -413,7 +363,7 @@ export default function PlannerPage() {
         {/* Mobile tabs */}
         <div className="sm:hidden mt-3 flex gap-1 p-1 bg-muted/40 rounded-xl border border-border/50">
           {TABS.map((t) => {
-            const Icon = t.icon;
+            const Icon   = t.icon;
             const active = tab === t.id;
             return (
               <button
@@ -438,6 +388,11 @@ export default function PlannerPage() {
       <div className="flex-1 min-h-0 overflow-hidden">
         <SplitLayout sidebar={plannerSidebar} sidebarWidth="lg:w-[260px]">
 
+          {/* ── OVERVIEW ── */}
+          {tab === "overview" && (
+            <OverviewPanel tasks={tasks} weekStart={weekStart} />
+          )}
+
           {/* ── SCHEDULE ── */}
           {tab === "schedule" && (
             <div className="flex flex-col h-full overflow-hidden">
@@ -447,7 +402,6 @@ export default function PlannerPage() {
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm font-bold tracking-tight">{formatDayTitle(selectedDate)}</h2>
 
-                    {/* Week theme badge */}
                     <div className={cn(
                       "inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold",
                       weekTheme.color
@@ -456,7 +410,6 @@ export default function PlannerPage() {
                       <span>W{weekTheme.week}: {weekTheme.title}</span>
                     </div>
 
-                    {/* Progress row */}
                     {totalCount > 0 && (
                       <div className="flex items-center gap-3 mt-2 flex-wrap">
                         <span className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
@@ -472,6 +425,11 @@ export default function PlannerPage() {
                           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                             <Circle className="size-3.5" />
                             {dayTasks.filter((t) => t.status === "todo").length} todo
+                          </span>
+                        )}
+                        {(searchQuery || statusFilter !== "all") && (
+                          <span className="text-[11px] text-primary font-medium">
+                            · {filteredDayTasks.length} shown
                           </span>
                         )}
                       </div>
@@ -500,7 +458,7 @@ export default function PlannerPage() {
                 )}
               </div>
 
-              {/* 3-section task list */}
+              {/* Task list */}
               <div className="flex-1 overflow-y-auto scrollbar-thin px-4 sm:px-5 py-3 space-y-3">
                 {loading ? (
                   <div className="py-12 text-center space-y-2">
@@ -543,55 +501,29 @@ export default function PlannerPage() {
                 )}
 
                 {!loading && totalCount === 0 && (
-                  <div className="pt-4 text-center space-y-3">
-                    <p className="text-xs text-muted-foreground">No tasks yet for this day.</p>
-                    {dayTasks.length === 0 && (
-                      <button
-                        onClick={handleSeed}
-                        disabled={seeding}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 transition-all disabled:opacity-50"
-                      >
-                        <Sparkles className="size-3.5" />
-                        {seeding ? "Seeding…" : "Seed sample month data"}
-                      </button>
-                    )}
+                  <div className="pt-8 text-center space-y-2">
+                    <CalendarDays className="size-10 text-muted-foreground/20 mx-auto" />
+                    <p className="text-sm font-semibold text-muted-foreground">No tasks for this day</p>
+                    <p className="text-xs text-muted-foreground/50">
+                      Use the sections above to add your first task
+                    </p>
+                  </div>
+                )}
+
+                {!loading && totalCount > 0 && filteredDayTasks.length === 0 && (
+                  <div className="pt-8 text-center space-y-2">
+                    <p className="text-sm font-semibold text-muted-foreground">No tasks match your filter</p>
+                    <p className="text-xs text-muted-foreground/50">Try a different search or filter</p>
                   </div>
                 )}
               </div>
 
-              {/* Pinned bottom AI */}
+              {/* Pinned AI panel */}
               <div className="shrink-0 border-t border-border/50 px-4 sm:px-5 py-3">
                 {!loading && (
                   <AISuggestionsPanel date={selectedDate} tasks={dayTasks} />
                 )}
               </div>
-            </div>
-          )}
-
-          {/* ── OVERVIEW ── */}
-          {tab === "overview" && (
-            <OverviewPanel tasks={tasks} weekStart={weekStart} />
-          )}
-
-          {/* ── BACKLOG ── */}
-          {tab === "backlog" && (
-            <div className="flex-1 overflow-y-auto scrollbar-thin px-4 sm:px-5 py-4 space-y-3">
-              <div>
-                <h3 className="text-sm font-bold">Backlog</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Tasks without a scheduled date</p>
-              </div>
-              <AddTaskForm key="backlog-add" date={selectedDate} onAdd={handleAddTask} />
-              {backlogTasks.length === 0 ? (
-                <div className="py-16 text-center space-y-2">
-                  <Archive className="size-10 text-muted-foreground/20 mx-auto" />
-                  <p className="text-sm font-semibold text-muted-foreground">Backlog is empty</p>
-                  <p className="text-xs text-muted-foreground/50">Tasks without a date appear here</p>
-                </div>
-              ) : (
-                backlogTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} onToggle={handleToggle} onDelete={handleDelete} onEdit={setEditingTask} />
-                ))
-              )}
             </div>
           )}
 
