@@ -1,13 +1,16 @@
-import { Check, Trash2, ChevronRight, Clock, Pencil } from "lucide-react";
+import { Check, Trash2, ChevronRight, Clock, Pencil, GripVertical } from "lucide-react";
 import type { PlannerTask } from "@/types/planner";
 import { PRIORITY_COLORS, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS, formatMinutes } from "@/types/planner";
 import { cn } from "@/lib/utils";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TaskCardProps {
   task: PlannerTask;
   onToggle: (task: PlannerTask) => void;
   onDelete: (id: string) => void;
   onEdit: (task: PlannerTask) => void;
+  dragOverlay?: boolean;
 }
 
 const STATUS_CONFIG = {
@@ -31,19 +34,48 @@ const STATUS_CONFIG = {
   },
 };
 
-export function TaskCard({ task, onToggle, onDelete, onEdit }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onDelete, onEdit, dragOverlay }: TaskCardProps) {
   const isDone = task.status === "done";
   const isInProgress = task.status === "in-progress";
   const cfg = STATUS_CONFIG[task.status];
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       className={cn(
         "group flex items-start gap-3 p-3.5 rounded-2xl border transition-all duration-200",
         cfg.bg,
-        isDone && "opacity-55"
+        isDone && "opacity-55",
+        isDragging && "opacity-40 scale-[0.98]",
+        dragOverlay && "shadow-xl ring-2 ring-primary/20 rotate-1 opacity-100"
       )}
     >
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="mt-0.5 shrink-0 size-5 flex items-center justify-center text-muted-foreground/30 hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors touch-none"
+        tabIndex={-1}
+        aria-label="Drag to reorder"
+      >
+        <GripVertical className="size-3.5" />
+      </button>
+
       {/* Status toggle button */}
       <button
         onClick={() => onToggle(task)}
@@ -74,7 +106,6 @@ export function TaskCard({ task, onToggle, onDelete, onEdit }: TaskCardProps) {
 
         {/* Meta row */}
         <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-          {/* Priority */}
           <span className={cn(
             "text-[10px] font-semibold px-1.5 py-0.5 rounded-md border capitalize",
             PRIORITY_COLORS[task.priority]
@@ -82,7 +113,6 @@ export function TaskCard({ task, onToggle, onDelete, onEdit }: TaskCardProps) {
             {task.priority}
           </span>
 
-          {/* Category */}
           <span className={cn(
             "text-[10px] font-medium px-1.5 py-0.5 rounded-md flex items-center gap-1",
             CATEGORY_COLORS[task.category]
@@ -91,7 +121,6 @@ export function TaskCard({ task, onToggle, onDelete, onEdit }: TaskCardProps) {
             {CATEGORY_LABELS[task.category]}
           </span>
 
-          {/* Time estimate */}
           {task.estimatedMinutes && (
             <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <Clock className="size-3" />
@@ -99,7 +128,6 @@ export function TaskCard({ task, onToggle, onDelete, onEdit }: TaskCardProps) {
             </span>
           )}
 
-          {/* In-progress badge */}
           {isInProgress && (
             <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
               ● In progress

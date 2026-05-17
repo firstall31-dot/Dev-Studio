@@ -2,55 +2,62 @@ import { useState, useRef, useEffect } from "react";
 import { Plus, X, Clock, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PlannerTask, TaskPriority, TaskCategory } from "@/types/planner";
-import { CATEGORY_LABELS, CATEGORY_ICONS, formatMinutes } from "@/types/planner";
+import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS, DAILY_PARTS, formatMinutes } from "@/types/planner";
 
 interface AddTaskFormProps {
   date: string;
+  defaultCategory?: TaskCategory;
   onAdd: (task: Omit<PlannerTask, "id" | "createdAt" | "updatedAt">) => void;
   onCancel?: () => void;
   initialOpen?: boolean;
 }
 
 const PRIORITIES: { value: TaskPriority; label: string; dot: string }[] = [
-  { value: "low", label: "Low", dot: "bg-emerald-500" },
-  { value: "medium", label: "Med", dot: "bg-amber-400" },
-  { value: "high", label: "High", dot: "bg-red-500" },
+  { value: "low",    label: "Low",  dot: "bg-emerald-500" },
+  { value: "medium", label: "Med",  dot: "bg-amber-400"   },
+  { value: "high",   label: "High", dot: "bg-red-500"     },
 ];
-
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as TaskCategory[];
 
 const TIME_OPTIONS = [
-  { value: 15, label: "15m" },
-  { value: 30, label: "30m" },
-  { value: 60, label: "1h" },
-  { value: 90, label: "1h 30m" },
-  { value: 120, label: "2h" },
-  { value: 180, label: "3h" },
-  { value: 240, label: "4h+" },
+  { value: 15,  label: "15m"    },
+  { value: 30,  label: "30m"    },
+  { value: 60,  label: "1h"     },
+  { value: 90,  label: "1h 30m" },
+  { value: 120, label: "2h"     },
+  { value: 180, label: "3h"     },
+  { value: 240, label: "4h+"    },
 ];
 
-export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddTaskFormProps) {
+export function AddTaskForm({
+  date,
+  defaultCategory = "work",
+  onAdd,
+  onCancel,
+  initialOpen = false,
+}: AddTaskFormProps) {
   const [open, setOpen] = useState(initialOpen);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [category, setCategory] = useState<TaskCategory>("general");
+  const [category, setCategory] = useState<TaskCategory>(defaultCategory);
   const [estimatedMinutes, setEstimatedMinutes] = useState<number | undefined>(undefined);
   const [showCatPicker, setShowCatPicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const catRef = useRef<HTMLDivElement>(null);
+  const catRef  = useRef<HTMLDivElement>(null);
   const timeRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open && titleRef.current) {
-      setTimeout(() => titleRef.current?.focus(), 50);
-    }
+    if (open && titleRef.current) setTimeout(() => titleRef.current?.focus(), 50);
   }, [open]);
 
   useEffect(() => {
+    if (defaultCategory) setCategory(defaultCategory);
+  }, [defaultCategory]);
+
+  useEffect(() => {
     function onOutside(e: MouseEvent) {
-      if (catRef.current && !catRef.current.contains(e.target as Node)) setShowCatPicker(false);
+      if (catRef.current  && !catRef.current.contains(e.target as Node))  setShowCatPicker(false);
       if (timeRef.current && !timeRef.current.contains(e.target as Node)) setShowTimePicker(false);
     }
     document.addEventListener("mousedown", onOutside);
@@ -59,7 +66,7 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
 
   const reset = () => {
     setTitle(""); setDescription(""); setPriority("medium");
-    setCategory("general"); setEstimatedMinutes(undefined);
+    setCategory(defaultCategory); setEstimatedMinutes(undefined);
     setOpen(false); setShowCatPicker(false); setShowTimePicker(false);
     onCancel?.();
   };
@@ -75,7 +82,7 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
       order: Date.now(),
     });
     setTitle(""); setDescription("");
-    setPriority("medium"); setCategory("general");
+    setPriority("medium"); setCategory(defaultCategory);
     setEstimatedMinutes(undefined);
     setOpen(false);
   };
@@ -84,12 +91,17 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all text-sm group"
+        className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-2 border-dashed border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all text-sm group"
       >
-        <div className="size-6 rounded-full bg-muted/60 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-          <Plus className="size-3.5 group-hover:text-primary" />
+        <div className="size-5 rounded-full bg-muted/60 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+          <Plus className="size-3 group-hover:text-primary" />
         </div>
-        <span className="text-sm">Add a task for this day…</span>
+        <span className="text-xs">Add a task…</span>
+        {defaultCategory !== "general" && (
+          <span className={cn("ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-md", CATEGORY_COLORS[defaultCategory])}>
+            {CATEGORY_ICONS[defaultCategory]} {CATEGORY_LABELS[defaultCategory]}
+          </span>
+        )}
       </button>
     );
   }
@@ -99,7 +111,6 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
       onSubmit={handleSubmit}
       className="rounded-2xl border border-primary/25 bg-gradient-to-b from-primary/5 to-transparent p-4 space-y-3 shadow-sm"
     >
-      {/* Title */}
       <input
         ref={titleRef}
         type="text"
@@ -111,7 +122,6 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
         className="w-full bg-background/80 border border-input rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/40 placeholder:text-muted-foreground/40 transition-all"
       />
 
-      {/* Description */}
       <input
         type="text"
         value={description}
@@ -121,7 +131,6 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
         className="w-full bg-background/60 border border-input/60 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 placeholder:text-muted-foreground/35 transition-all"
       />
 
-      {/* Controls row */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* Priority pills */}
         <div className="flex items-center gap-1 bg-muted/40 rounded-xl p-1">
@@ -155,28 +164,30 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
             <ChevronDown className="size-3 text-muted-foreground" />
           </button>
           {showCatPicker && (
-            <div className="absolute top-full left-0 mt-1.5 z-50 bg-popover border border-border rounded-2xl shadow-lg overflow-hidden p-1 w-48">
-              {CATEGORIES.map((c) => (
+            <div className="absolute top-full left-0 mt-1.5 z-50 bg-popover border border-border rounded-2xl shadow-lg overflow-hidden p-1 w-44">
+              {DAILY_PARTS.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => { setCategory(c); setShowCatPicker(false); }}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                    "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium transition-colors text-left",
                     category === c
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-muted/60 text-foreground"
                   )}
                 >
                   <span className="text-base">{CATEGORY_ICONS[c]}</span>
-                  {CATEGORY_LABELS[c]}
+                  <div>
+                    <p className="font-semibold">{CATEGORY_LABELS[c]}</p>
+                  </div>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Time estimate picker */}
+        {/* Time estimate */}
         <div className="relative" ref={timeRef}>
           <button
             type="button"
@@ -223,7 +234,6 @@ export function AddTaskForm({ date, onAdd, onCancel, initialOpen = false }: AddT
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-2 pt-0.5">
         <button
           type="submit"
