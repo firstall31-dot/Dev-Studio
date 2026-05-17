@@ -322,7 +322,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 p-2 pl-0 md:pl-0 gap-2">
 
         {/* ── Top header bar ───────────────────────── */}
-        <header className="shrink-0 flex items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-background/80 backdrop-blur-sm border border-border/60 shadow-sm">
+        <header className="shrink-0 flex items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-background/80 backdrop-blur-sm border border-border/60 shadow-sm relative z-[100]">
 
           {/* Left: sidebar toggle */}
           <div className="flex items-center gap-2 shrink-0">
@@ -414,7 +414,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
                 {/* Notification dropdown */}
                 {notifOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-lg z-50 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-lg z-[9999] overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border/60">
                       <div className="flex items-center gap-2">
