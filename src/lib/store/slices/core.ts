@@ -123,6 +123,7 @@ export const createCoreSlice: StateCreator<ForgeState, [["zustand/persist", unkn
           id: x.id,
           question: x.question,
           answer: x.answer,
+          answerDepths: x.answerDepths || [],
           difficulty: (x.difficulty as Difficulty) || "mid",
           area: (x.area as FocusArea) || "frontend",
           category: x.category || "frontend",

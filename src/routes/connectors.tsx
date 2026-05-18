@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageHeader, PageContainer, PageSection, TabNav, SplitLayout } from "@/components/layout";
-import { Users, Building2, Briefcase } from "lucide-react";
+import { Users } from "lucide-react";
 import { z } from "zod";
 import { useForge, newId } from "@/lib/store";
 import { ConnectorsSidebar } from "@/components/connectors/connectors-sidebar";
 import { ConnectorEditor } from "@/components/connectors/connector-editor";
 import type { Connector } from "@/types/tools";
+import { CONNECTORS_TABS } from "@/constants";
 
 const connectorsSearchSchema = z.object({
   tab: z.string().optional(),
@@ -20,11 +21,6 @@ export const Route = createFileRoute("/connectors")({
   component: ConnectorsPage,
 });
 
-const CONNECTORS_TABS = [
-  { id: "companies", label: "Companies",   icon: Building2 },
-  { id: "hr",        label: "HR Contacts", icon: Briefcase },
-  { id: "clients",   label: "Clients",     icon: Users },
-];
 
 function ConnectorsPage() {
   const navigate = useNavigate();

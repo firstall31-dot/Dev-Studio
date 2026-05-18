@@ -1,3 +1,6 @@
+import { TaskCategory } from "@/types/planner";
+import { WEEK_THEMES } from "@/constants/planner";
+
 export function toDateStr(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
@@ -33,4 +36,28 @@ export function formatMinutesLabel(min: number): string {
   const ap  = h >= 12 ? "PM" : "AM";
   const h12 = h % 12 || 12;
   return `${h12}:${String(m).padStart(2, "0")} ${ap}`;
+}
+
+export function getWeekOfMonth(dateStr: string): number {
+  const d = new Date(dateStr + "T00:00:00");
+  return Math.min(Math.ceil(d.getDate() / 7), 4);
+}
+
+export function getWeekTheme(dateStr: string) {
+  const week = getWeekOfMonth(dateStr);
+  return WEEK_THEMES[week - 1];
+}
+
+export function normCategory(cat: string): TaskCategory {
+  if (["activities", "work", "learning", "general"].includes(cat)) return cat as TaskCategory;
+  if (["personal"].includes(cat)) return "activities";
+  if (["coding", "freelance", "job-search", "meetings"].includes(cat)) return "work";
+  return "general";
+}
+
+export function formatMinutes(min: number): string {
+  if (min < 60) return `${min}m`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }

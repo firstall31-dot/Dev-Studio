@@ -6,10 +6,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PlannerTask } from "@/types/planner";
-import { WEEK_THEMES, getWeekTheme, CATEGORY_ICON_COMPONENTS, CATEGORY_LABELS } from "@/types/planner";
-import { toDateStr, addDays } from "@/lib/planner-utils";
-
-type StatusFilter = "all" | "todo" | "in-progress" | "done";
+import { WEEK_THEMES, CATEGORY_ICON_COMPONENTS, CATEGORY_LABELS } from "@/constants/planner";
+import { getWeekTheme, toDateStr, addDays } from "@/lib/utils/planner";
+import { DAY_NAMES, MONTH_NAMES, STORAGE_KEYS, STATUS_FILTERS } from "@/constants";
+import type { StatusFilter } from "@/constants";
 
 interface PlannerSidebarProps {
   selectedDate: string;
@@ -28,23 +28,18 @@ interface PlannerSidebarProps {
   extraBottom?: ReactNode;
 }
 
-const DAY_NAMES   = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-const ACHV_KEY = "ds-week-achievements";
+const ACHV_KEY = STORAGE_KEYS.WEEK_ACHIEVEMENTS;
 function loadAchievements(): Record<string, string> {
   try { return JSON.parse(localStorage.getItem(ACHV_KEY) ?? "{}"); } catch { return {}; }
 }
 function saveAchievements(map: Record<string, string>) {
-  try { localStorage.setItem(ACHV_KEY, JSON.stringify(map)); } catch {}
+  try {
+    localStorage.setItem(ACHV_KEY, JSON.stringify(map));
+  } catch (err) {
+    console.warn("[planner-sidebar] Failed to save achievements:", err);
+  }
 }
 
-const STATUS_FILTERS: { id: StatusFilter; label: string; color: string }[] = [
-  { id: "all",         label: "All",    color: "text-foreground" },
-  { id: "todo",        label: "Todo",   color: "text-muted-foreground" },
-  { id: "in-progress", label: "Active", color: "text-primary" },
-  { id: "done",        label: "Done",   color: "text-emerald-600" },
-];
 
 export function PlannerSidebar({
   selectedDate,

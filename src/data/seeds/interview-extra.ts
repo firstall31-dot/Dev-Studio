@@ -619,27 +619,27 @@ export const seedInterviewExtra: InterviewQuestion[] = [
     createdAt: now,
   },
 
-  // ─── SUPABASE ────────────────────────────────────────────────────────────
+  // ─── DRIZZLE & POSTGRES ──────────────────────────────────────────────────
   {
     id: q(54),
     area: "backend",
     difficulty: "junior",
-    question: "How does authentication work in a Supabase application?",
+    question: "What is Drizzle ORM and how does it differ from traditional ORMs?",
     answer:
-      "Supabase Auth provides secure user management using GoTrue under the hood. You can authenticate users via email/password, magic links, or OAuth providers. When a user logs in, they receive a JWT. The client library automatically attaches this JWT to subsequent database requests. PostgREST parses the JWT and sets Postgres configuration variables, allowing Row Level Security (RLS) policies to apply auth logic securely at the database layer.",
-    tags: ["supabase", "auth", "jwt"],
-    category: "Supabase",
+      "Drizzle ORM is a lightweight, edge-ready TypeScript ORM that closely mirrors SQL. Unlike traditional ORMs (like Prisma) that use an intermediate schema language and an abstraction layer, Drizzle allows you to write SQL-like queries in TypeScript with full type safety. This results in zero hidden queries, predictable performance, and no need for a heavy query engine, making it ideal for serverless environments.",
+    tags: ["drizzle", "orm", "postgres", "typescript"],
+    category: "Database (Postgres)",
     createdAt: now,
   },
   {
     id: q(55),
     area: "backend",
     difficulty: "mid",
-    question: "What is Row Level Security (RLS) in Supabase and why is it important?",
+    question: "How do you handle schema migrations with Drizzle ORM?",
     answer:
-      "Row Level Security (RLS) is a PostgreSQL feature used heavily by Supabase to secure data at the database layer instead of the API layer. It allows defining policies (using SQL) that restrict which rows a user can SELECT, INSERT, UPDATE, or DELETE. In Supabase, the user's JWT is decoded into Postgres connection variables (e.g., auth.uid()), which RLS policies use to enforce ownership and permissions directly, eliminating the need for a custom middle-tier security layer.",
-    tags: ["supabase", "rls", "security", "postgresql"],
-    category: "Supabase",
+      "Schema migrations in Drizzle are handled using 'drizzle-kit'. You define your schema in TypeScript files (e.g., using `pgTable`). Then, you run `drizzle-kit generate` to read your TypeScript schema and automatically generate the necessary SQL migration files. These SQL files can then be applied to your Postgres database using `drizzle-kit push` or through a custom migration runner like `migrate()` provided by Drizzle's database drivers.",
+    tags: ["drizzle", "migrations", "database", "postgresql"],
+    category: "Database (Postgres)",
     favorite: true,
     createdAt: now,
   },
@@ -647,11 +647,11 @@ export const seedInterviewExtra: InterviewQuestion[] = [
     id: q(56),
     area: "backend",
     difficulty: "senior",
-    question: "What is the difference between Postgres functions (RPC) and Edge Functions in Supabase?",
+    question: "What are the performance benefits of using connection pooling (like pg-pool or neon-serverless) with Postgres in a serverless environment?",
     answer:
-      "Postgres functions (RPCs) run inside the database using PL/pgSQL or plv8. They are ideal for data-intensive operations, aggregations, or anything that requires direct, fast access to tables. Edge Functions are serverless TypeScript functions running on Deno globally across a CDN. They are better suited for integrating with third-party APIs (like Stripe or OpenAI), listening to webhooks, or offloading CPU-intensive tasks that shouldn't tie up database resources.",
-    tags: ["supabase", "edge-functions", "rpc", "architecture"],
-    category: "Supabase",
+      "In a serverless environment, applications scale dynamically, potentially opening thousands of simultaneous connections to the database. Postgres typically forks a new process for each connection, which consumes significant memory (around 10MB per connection) and connection setup time. Connection pooling mitigates this by maintaining a pool of persistent connections that serverless functions can reuse, significantly reducing latency and preventing the database server from running out of memory or connection slots under high load.",
+    tags: ["postgres", "performance", "serverless", "architecture"],
+    category: "Database (Postgres)",
     createdAt: now,
   },
 ];

@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Plus, X, Clock, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PlannerTask, TaskPriority, TaskCategory } from "@/types/planner";
-import { CATEGORY_LABELS, CATEGORY_ICON_COMPONENTS, CATEGORY_COLORS, DAILY_PARTS, formatMinutes } from "@/types/planner";
+import { CATEGORY_LABELS, CATEGORY_ICON_COMPONENTS, CATEGORY_COLORS, DAILY_PARTS, TASK_PRIORITY_OPTIONS as PRIORITIES, TASK_TIME_OPTIONS as TIME_OPTIONS } from "@/constants/planner";
+import { formatMinutes } from "@/lib/utils/planner";
 
 interface AddTaskFormProps {
   date: string;
@@ -12,21 +13,6 @@ interface AddTaskFormProps {
   initialOpen?: boolean;
 }
 
-const PRIORITIES: { value: TaskPriority; label: string; dot: string }[] = [
-  { value: "low",    label: "Low",  dot: "bg-emerald-500" },
-  { value: "medium", label: "Med",  dot: "bg-amber-400"   },
-  { value: "high",   label: "High", dot: "bg-red-500"     },
-];
-
-const TIME_OPTIONS = [
-  { value: 15,  label: "15m"    },
-  { value: 30,  label: "30m"    },
-  { value: 60,  label: "1h"     },
-  { value: 90,  label: "1h 30m" },
-  { value: 120, label: "2h"     },
-  { value: 180, label: "3h"     },
-  { value: 240, label: "4h+"    },
-];
 
 export function AddTaskForm({
   date,

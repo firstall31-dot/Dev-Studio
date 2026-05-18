@@ -49,33 +49,6 @@ export const backendArea: SkillAreaData = {
       accent: "border-primary/30",
       tags: ["go"],
     },
-    {
-      id: "supabase",
-      label: "Supabase",
-      color: "border-emerald-500/40 bg-emerald-500/10 text-emerald-500",
-      accent: "border-emerald-500/30",
-      tags: ["supabase", "postgres", "baas"],
-      concepts: [
-        {
-          title: "PostgreSQL Under the Hood",
-          body: "Supabase is not a black-box NoSQL DB; it's a full Postgres database. Use triggers, functions, and RLS directly.",
-        },
-        {
-          title: "Row Level Security (RLS)",
-          body: "Secure data at the database layer. Policies determine who can read/write rows based on their JWT auth context.",
-        },
-        {
-          title: "Realtime",
-          body: "Listen to Postgres changes via WebSockets. Requires enabling Realtime on specific tables and proper RLS.",
-        },
-      ],
-      resources: [
-        {
-          label: "Supabase Docs",
-          url: "https://supabase.com/docs",
-          desc: "Official documentation and guides.",
-        },
-      ],
-    },
+
   ],
 };

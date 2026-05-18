@@ -4,6 +4,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import type { MailTemplate } from "@/types/tools";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ONE_WEEK_MS } from "@/constants";
 
 interface MailsSidebarProps {
   channel: string;
@@ -22,7 +23,6 @@ const FILTERS: { label: string; value: MailFilter }[] = [
   { label: "A–Z", value: "az" },
 ];
 
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const ChannelIcon = ({ channel }: { channel: string }) => {
   if (channel === "cover-letter") return <FileText className="size-3.5" />;

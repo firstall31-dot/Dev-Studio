@@ -22,9 +22,9 @@ import { getPlannerTasks, upsertPlannerTask, deletePlannerTask } from "@/lib/api
 import type { PlannerTask, TaskStatus, TaskCategory } from "@/types/planner";
 import {
   CATEGORY_LABELS, CATEGORY_ICON_COMPONENTS, CATEGORY_SECTION_STYLES,
-  DAILY_PARTS, getWeekTheme, normCategory,
-} from "@/types/planner";
-import { toDateStr, addDays } from "@/lib/planner-utils";
+  DAILY_PARTS
+} from "@/constants/planner";
+import { toDateStr, addDays, getWeekTheme, normCategory } from "@/lib/utils/planner";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { SplitLayout } from "@/components/layout";

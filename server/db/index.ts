@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "../../shared/schema.js";
@@ -12,10 +13,11 @@ if (!process.env.DATABASE_URL) {
   console.warn("\x1b[33m%s\x1b[0m", "WARNING: DATABASE_URL is not set. Database operations will fail if called.");
 }
 
-export const pool = new Pool({ 
+export const pool = new Pool({
   connectionString,
-  // Ensure we don't crash on connection errors during initialization
-  connectionTimeoutMillis: 5000 
+  connectionTimeoutMillis: 5000,
+  // Required for Neon PostgreSQL (TLS-only endpoint)
+  ssl: process.env.DATABASE_URL?.includes("neon.tech") ? { rejectUnauthorized: false } : undefined,
 });
 
 export const db = drizzle(pool, { schema });

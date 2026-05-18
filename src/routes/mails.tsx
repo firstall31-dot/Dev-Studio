@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageHeader, PageContainer, PageSection, TabNav, SplitLayout } from "@/components/layout";
-import { Mail, Send, MessageCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { z } from "zod";
 import { useForge, newId } from "@/lib/store";
 import { MailsSidebar } from "@/components/mails/mails-sidebar";
 import { TemplateEditor } from "@/components/mails/template-editor";
 import type { MailTemplate } from "@/types/tools";
+import { MAIL_TABS } from "@/constants";
 
 const mailsSearchSchema = z.object({
   tab: z.string().optional(),
@@ -20,11 +21,6 @@ export const Route = createFileRoute("/mails")({
   component: MailsPage,
 });
 
-const MAIL_TABS = [
-  { id: "cover-letter", label: "Cover Letters", icon: Send },
-  { id: "gmail",        label: "Gmail",         icon: Mail },
-  { id: "whatsapp",     label: "WhatsApp",      icon: MessageCircle },
-];
 
 function MailsPage() {
   const navigate = useNavigate();

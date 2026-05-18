@@ -16,7 +16,11 @@ function loadTasks(areaId: string): SkillTask[] {
   catch { return []; }
 }
 function saveTasks(areaId: string, tasks: SkillTask[]) {
-  try { localStorage.setItem(`ds-skill-tasks-${areaId}`, JSON.stringify(tasks)); } catch {}
+  try {
+    localStorage.setItem(`ds-skill-tasks-${areaId}`, JSON.stringify(tasks));
+  } catch (err) {
+    console.warn("[tasks-section] Failed to save tasks:", err);
+  }
 }
 
 interface Props {

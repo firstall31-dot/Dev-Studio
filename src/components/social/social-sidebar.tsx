@@ -4,6 +4,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import type { SocialDraft } from "@/types/tools";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ONE_WEEK_MS } from "@/constants";
 
 interface SocialSidebarProps {
   platform: string;
@@ -28,7 +29,6 @@ const FILTERS: { label: string; value: DraftFilter }[] = [
   { label: "Older", value: "older" },
 ];
 
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function SocialSidebar({
   platform,

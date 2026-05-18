@@ -17,7 +17,11 @@ function loadProjects(areaId: string): SkillProject[] {
   catch { return []; }
 }
 function saveProjects(areaId: string, projects: SkillProject[]) {
-  try { localStorage.setItem(`ds-skill-projects-${areaId}`, JSON.stringify(projects)); } catch {}
+  try {
+    localStorage.setItem(`ds-skill-projects-${areaId}`, JSON.stringify(projects));
+  } catch (err) {
+    console.warn("[projects-section] Failed to save projects:", err);
+  }
 }
 
 const EMPTY_FORM = () => ({ title: "", desc: "", url: "", tags: "" });

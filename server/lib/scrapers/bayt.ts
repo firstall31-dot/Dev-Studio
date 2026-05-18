@@ -37,7 +37,9 @@ export async function scrapeBayt(query: string, location: string, days: number):
           });
         }
       }
-    } catch {}
+    } catch (err) {
+      console.warn("[bayt] Failed to parse JSON-LD script:", err);
+    }
   }
   return jobs;
 }

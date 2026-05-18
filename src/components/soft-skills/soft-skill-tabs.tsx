@@ -1,22 +1,6 @@
 import { useSearch } from "@tanstack/react-router";
-import {
-  MessageCircle,
-  Target,
-  Lightbulb,
-  Users,
-  MessageSquare,
-  Trophy,
-} from "lucide-react";
 import { TabNav } from "@/components/layout";
-
-const TABS = [
-  { id: "top-10",         label: "Top 10",          icon: Trophy },
-  { id: "communication",  label: "Communication",   icon: MessageCircle },
-  { id: "leadership",     label: "Leadership",      icon: Target },
-  { id: "problem-solving",label: "Problem Solving", icon: Lightbulb },
-  { id: "teamwork",       label: "Teamwork",        icon: Users },
-  { id: "ai-mock",        label: "AI Mock Chat",    icon: MessageSquare },
-] as const;
+import { SOFT_SKILL_TABS } from "@/constants";
 
 export function SoftSkillTabs() {
   const searchParams = useSearch({ strict: false }) as Record<string, string | undefined>;
@@ -24,7 +8,7 @@ export function SoftSkillTabs() {
 
   return (
     <TabNav
-      tabs={TABS.map((t) => ({
+      tabs={SOFT_SKILL_TABS.map((t) => ({
         id: t.id,
         label: t.label,
         icon: t.icon,

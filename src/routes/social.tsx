@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageHeader, PageContainer, PageSection, TabNav, SplitLayout } from "@/components/layout";
-import { Linkedin, Twitter, Instagram, Share2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { z } from "zod";
 import { useForge, newId } from "@/lib/store";
 import { SocialSidebar } from "@/components/social/social-sidebar";
 import { PostEditor } from "@/components/social/post-editor";
 import type { SocialDraft } from "@/types/tools";
+import { SOCIAL_TABS } from "@/constants";
 
 const socialSearchSchema = z.object({
   tab: z.string().optional(),
@@ -20,11 +21,6 @@ export const Route = createFileRoute("/social")({
   component: SocialPage,
 });
 
-const SOCIAL_TABS = [
-  { id: "linkedin",  label: "LinkedIn",    icon: Linkedin },
-  { id: "twitter",   label: "X / Twitter", icon: Twitter },
-  { id: "instagram", label: "Instagram",   icon: Instagram },
-];
 
 function SocialPage() {
   const navigate = useNavigate();

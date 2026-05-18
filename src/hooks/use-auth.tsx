@@ -44,7 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           location: data.location ?? null,
         });
       }
-    } catch {}
+    } catch (err) {
+      console.warn("[auth] Failed to fetch profile:", err);
+    }
   }, []);
 
   const fetchUser = useCallback(async () => {

@@ -14,26 +14,35 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { WORKSPACE_NAV, COMMUNICATION_NAV, FREELANCE_NAV, SKILLS_NAV, STORAGE_KEYS } from "@/constants";
 
 /* ── Theme ─────────────────────────────────────────────── */
-const THEME_KEY = "ds-theme";
+const THEME_KEY = STORAGE_KEYS.THEME;
 function readTheme(): "dark" | "light" {
   try { return (localStorage.getItem(THEME_KEY) as "dark" | "light") || "dark"; } catch { return "dark"; }
 }
 function applyTheme(t: "dark" | "light") {
   document.documentElement.classList.toggle("dark", t === "dark");
-  try { localStorage.setItem(THEME_KEY, t); } catch {}
+  try {
+    localStorage.setItem(THEME_KEY, t);
+  } catch (err) {
+    console.warn("[app-shell] Failed to save theme preference:", err);
+  }
 }
 
 /* ── Language ───────────────────────────────────────────── */
-const LANG_KEY = "ds-lang";
+const LANG_KEY = STORAGE_KEYS.LANG;
 function readLang(): "en" | "ar" {
   try { return (localStorage.getItem(LANG_KEY) as "en" | "ar") || "en"; } catch { return "en"; }
 }
 function applyLang(l: "en" | "ar") {
   document.documentElement.setAttribute("lang", l);
   document.documentElement.setAttribute("dir", l === "ar" ? "rtl" : "ltr");
-  try { localStorage.setItem(LANG_KEY, l); } catch {}
+  try {
+    localStorage.setItem(LANG_KEY, l);
+  } catch (err) {
+    console.warn("[app-shell] Failed to save language preference:", err);
+  }
 }
 
 /* ── Notifications ──────────────────────────────────────── */
@@ -57,29 +66,6 @@ function NotifIcon({ icon }: { icon: AppNotification["icon"] }) {
   if (icon === "calendar") return <CalendarCheck className="size-3.5 text-emerald-500" />;
   return <Info className="size-3.5 text-muted-foreground" />;
 }
-
-/* ── Nav data ───────────────────────────────────────────── */
-const WORKSPACE_NAV = [
-  { to: "/",        label: "Dashboard", icon: LayoutDashboard },
-  { to: "/planner", label: "Planner",   icon: CalendarDays    },
-  { to: "/tools",   label: "Tools",     icon: Code2           },
-] as const;
-
-const COMMUNICATION_NAV = [
-  { to: "/social",     label: "Social Media",      icon: ComponentIcon, match: ["/social"],     search: { tab: "linkedin" } },
-  { to: "/mails",      label: "Mails & Messaging", icon: Bot,           match: ["/mails"],      search: { tab: "cover-letter" } },
-  { to: "/connectors", label: "Connectors",         icon: Users,         match: ["/connectors"], search: { tab: "companies" } },
-  { to: "/cv",         label: "CV Builder",         icon: FileText,      match: ["/cv"],         search: {} },
-] as const;
-
-const FREELANCE_NAV = [
-  { to: "/jobs", label: "Jobs & Freelance", icon: Briefcase, match: ["/jobs"], search: { tab: "jobs" } },
-] as const;
-
-const SKILLS_NAV = [
-  { to: "/tech-skills", label: "Tech Skills", icon: Code,  match: ["/tech-skills"], search: { tab: "frontend" } },
-  { to: "/soft-skills", label: "Soft Skills", icon: Heart, match: ["/soft-skills"], search: { tab: "communication" } },
-] as const;
 
 /* ── NavItem ────────────────────────────────────────────── */
 function NavItem({ item, active, isCollapsed }: { item: any; active: boolean; isCollapsed: boolean }) {
@@ -120,12 +106,16 @@ function SectionLabel({ label, isCollapsed }: { label: string; isCollapsed: bool
   );
 }
 
-const SIDEBAR_KEY = "ds-sidebar-collapsed";
+const SIDEBAR_KEY = STORAGE_KEYS.SIDEBAR_COLLAPSED;
 function readSidebarPref(): boolean {
   try { return localStorage.getItem(SIDEBAR_KEY) !== "false"; } catch { return true; }
 }
 function writeSidebarPref(c: boolean) {
-  try { localStorage.setItem(SIDEBAR_KEY, String(c)); } catch {}
+  try {
+    localStorage.setItem(SIDEBAR_KEY, String(c));
+  } catch (err) {
+    console.warn("[app-shell] Failed to save sidebar collapse preference:", err);
+  }
 }
 
 /* ── AppShell ───────────────────────────────────────────── */
@@ -143,7 +133,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     applyTheme(next);
     setThemeState(next);
   };
-  useEffect(() => { applyTheme(theme); }, []);
+  useEffect(() => { applyTheme(theme); }, [theme]);
 
   /* Language */
   const [lang, setLangState] = useState<"en" | "ar">(readLang);
@@ -152,7 +142,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     applyLang(next);
     setLangState(next);
   };
-  useEffect(() => { applyLang(lang); }, []);
+  useEffect(() => { applyLang(lang); }, [lang]);
 
   /* Notifications */
   const [notifications, setNotifications] = useState<AppNotification[]>(INIT_NOTIFICATIONS);

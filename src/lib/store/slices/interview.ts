@@ -37,10 +37,8 @@ export const createInterviewSlice: StateCreator<ForgeState, [["zustand/persist",
     try {
       const saved = await db.upsertInterviewQuestion({
         ...q,
-        domain: q.area,
-        is_global: q.favorite,
-        user_id: ''
-      } as any);
+        isGlobal: false,
+      });
       if (saved?.id && saved.id !== q.id) {
         set((s) => ({ interviewQuestions: s.interviewQuestions.map(x => x.id === q.id ? { ...x, id: saved.id as string } : x) }));
       }

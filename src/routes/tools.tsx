@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, PageContainer, PageSection, TabNav } from "@/components/layout";
-import { Sparkles, Bot, Component as ComponentIcon, LayoutTemplate, Code2, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { Prompts } from "@/components/tools/prompts";
 import { Agents } from "@/components/tools/agents";
 import { Components } from "@/components/tools/components";
 import { Templates } from "@/components/tools/templates";
 import { Snippets } from "@/components/tools/snippets";
+import { TOOLS_TABS } from "@/constants";
 
 type ToolTab = "prompts" | "agents" | "components" | "templates" | "snippets";
 
@@ -32,14 +33,6 @@ function ToolsPage() {
     navigate({ search: { tab: newTab, id: undefined } });
   };
 
-  const tabs = [
-    { id: "prompts",    label: "Prompts",    icon: Sparkles },
-    { id: "agents",     label: "Agents",     icon: Bot },
-    { id: "components", label: "Components", icon: ComponentIcon },
-    { id: "templates",  label: "Templates",  icon: LayoutTemplate },
-    { id: "snippets",   label: "Snippets",   icon: Code2 },
-  ] as const;
-
   return (
     <PageContainer>
       <PageSection>
@@ -50,7 +43,7 @@ function ToolsPage() {
           className="mb-4"
         />
         <TabNav
-          tabs={tabs.map((t) => ({
+          tabs={TOOLS_TABS.map((t) => ({
             ...t,
             onClick: () => setTab(t.id as ToolTab),
           }))}

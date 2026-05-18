@@ -9,7 +9,7 @@ import { eq, or } from "drizzle-orm";
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretjwtkey_devstudio_2026_secure_random_string";
 const COOKIE_NAME = "ds_token";
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -36,6 +36,7 @@ function safeUser(u: typeof authUsers.$inferSelect) {
     avatarUrl: u.avatarUrl,
     name: u.displayName ?? u.email ?? "User",
     profileImage: u.avatarUrl ?? null,
+    isVerified: u.isVerified,
   };
 }
 
@@ -51,13 +52,26 @@ router.post("/register", async (req: Request, res: Response) => {
     if (existing.length > 0) return res.status(409).json({ error: "An account with this email already exists" });
 
     const passwordHash = await bcrypt.hash(password, 12);
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     const [user] = await db.insert(authUsers).values({
       email: email.toLowerCase(),
       passwordHash,
       displayName: displayName || email.split("@")[0],
+      isVerified: false,
+      verificationToken,
+      verificationTokenExpires,
     }).returning();
 
-    sendToken(res, user.id, safeUser(user));
+    console.log(`[auth] Dev Verification Code for ${user.email}: ${verificationToken}`);
+
+    res.json({
+      requireVerification: true,
+      email: user.email,
+      devVerificationCode: verificationToken,
+      message: "Registration successful. Please verify your email.",
+    });
   } catch (err) {
     console.error("[auth] register error:", err);
     res.status(500).json({ error: "Registration failed" });
@@ -75,10 +89,77 @@ router.post("/login", async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return res.status(401).json({ error: "Invalid email or password" });
 
+    if (!user.isVerified) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      await db.update(authUsers)
+        .set({ verificationToken: code, verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), updatedAt: new Date() })
+        .where(eq(authUsers.id, user.id));
+
+      console.log(`[auth] New Dev Verification Code for ${user.email}: ${code}`);
+      return res.status(403).json({
+        error: "Please verify your email first",
+        requireVerification: true,
+        email: user.email,
+        devVerificationCode: code,
+      });
+    }
+
     sendToken(res, user.id, safeUser(user));
   } catch (err) {
     console.error("[auth] login error:", err);
     res.status(500).json({ error: "Login failed" });
+  }
+});
+
+router.post("/verify-email", async (req: Request, res: Response) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ error: "Email and verification code are required" });
+
+    const [user] = await db.select().from(authUsers).where(eq(authUsers.email, email.toLowerCase()));
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.isVerified) {
+      return sendToken(res, user.id, safeUser(user));
+    }
+
+    if (user.verificationToken !== code) {
+      return res.status(400).json({ error: "Invalid verification code" });
+    }
+    if (user.verificationTokenExpires && new Date() > user.verificationTokenExpires) {
+      return res.status(400).json({ error: "Verification code has expired. Please request a new one." });
+    }
+
+    const [updated] = await db.update(authUsers)
+      .set({ isVerified: true, verificationToken: null, verificationTokenExpires: null, updatedAt: new Date() })
+      .where(eq(authUsers.id, user.id))
+      .returning();
+
+    sendToken(res, updated.id, safeUser(updated));
+  } catch (err) {
+    console.error("[auth] verify-email error:", err);
+    res.status(500).json({ error: "Verification failed" });
+  }
+});
+
+router.post("/resend-verification", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const [user] = await db.select().from(authUsers).where(eq(authUsers.email, email.toLowerCase()));
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.isVerified) return res.json({ message: "Email is already verified" });
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    await db.update(authUsers)
+      .set({ verificationToken: code, verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), updatedAt: new Date() })
+      .where(eq(authUsers.id, user.id));
+
+    console.log(`[auth] Resent Dev Verification Code for ${email}: ${code}`);
+    res.json({ requireVerification: true, email: user.email, devVerificationCode: code });
+  } catch (err) {
+    console.error("[auth] resend-verification error:", err);
+    res.status(500).json({ error: "Failed to resend verification code" });
   }
 });
 
@@ -124,6 +205,7 @@ export function setupGooglePassport() {
       clientSecret,
       callbackURL: "/api/auth/google/callback",
       scope: ["profile", "email"],
+      proxy: true,
     },
     async (_accessToken, _refreshToken, profile, done) => {
       try {
@@ -138,7 +220,7 @@ export function setupGooglePassport() {
 
         if (existing) {
           const [updated] = await db.update(authUsers)
-            .set({ googleId, displayName: existing.displayName ?? displayName, avatarUrl: existing.avatarUrl ?? avatarUrl, updatedAt: new Date() })
+            .set({ googleId, displayName: existing.displayName ?? displayName, avatarUrl: existing.avatarUrl ?? avatarUrl, isVerified: true, updatedAt: new Date() })
             .where(eq(authUsers.id, existing.id))
             .returning();
           return done(null, updated);
@@ -149,6 +231,7 @@ export function setupGooglePassport() {
           googleId,
           displayName,
           avatarUrl,
+          isVerified: true,
         }).returning();
         return done(null, created);
       } catch (err) {

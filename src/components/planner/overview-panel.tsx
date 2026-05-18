@@ -1,15 +1,14 @@
 import { CheckCircle2, Circle, Clock, TrendingUp, Flame, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PlannerTask } from "@/types/planner";
-import { CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICON_COMPONENTS } from "@/types/planner";
-import { toDateStr, addDays } from "@/lib/planner-utils";
+import { CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICON_COMPONENTS } from "@/constants/planner";
+import { toDateStr, addDays } from "@/lib/utils/planner";
+import { DAY_NAMES } from "@/constants";
 
 interface OverviewPanelProps {
   tasks: PlannerTask[];
   weekStart: Date;
 }
-
-const DAY_NAMES = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 
 export function OverviewPanel({ tasks, weekStart }: OverviewPanelProps) {
   const today = toDateStr(new Date());

@@ -1,34 +1,13 @@
 import { useState, useMemo } from "react";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
-import {
-  Search,
-  ChevronRight,
-  Sparkles,
-  Globe,
-  Server,
-  Database,
-  Container,
-  Layout,
-  Cpu,
-  Plus,
-  GraduationCap,
-} from "lucide-react";
+import { Search, ChevronRight, Sparkles, Plus, GraduationCap } from "lucide-react";
 import { SplitLayout } from "../layout";
 import { useForge } from "@/lib/store";
 import { QAEditorDialog } from "./qa-editor-dialog";
 import type { FocusArea } from "@/types/common";
 import type { InterviewQuestion } from "@/types/skills";
-
-const DIFFICULTIES = ["easy", "medium", "hard"] as const;
-const DOMAINS = [
-  { id: "frontend", label: "Frontend", icon: Globe },
-  { id: "backend", label: "Backend", icon: Server },
-  { id: "database", label: "Database", icon: Database },
-  { id: "devops", label: "DevOps", icon: Container },
-  { id: "architecture", label: "Architecture", icon: Layout },
-  { id: "core", label: "Core CS", icon: Cpu },
-];
+import { DIFFICULTIES, DOMAINS } from "@/constants";
 
 export function QuestionList() {
   const { interviewQuestions, deleteInterviewQuestion, toggleFavoriteInterviewQuestion } = useForge();

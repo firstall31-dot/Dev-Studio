@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PlannerTask, TaskPriority, TaskStatus, TaskCategory } from "@/types/planner";
-import { CATEGORY_LABELS } from "@/types/planner";
+import { TASK_PRIORITIES as PRIORITIES, TASK_STATUSES as STATUSES, TASK_CATEGORIES as CATEGORIES, PRIORITY_CLASSES, STATUS_CLASSES, CATEGORY_LABELS } from "@/constants/planner";
 
 interface EditTaskDialogProps {
   task: PlannerTask | null;
@@ -10,21 +10,6 @@ interface EditTaskDialogProps {
   onClose: () => void;
 }
 
-const PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
-const STATUSES: TaskStatus[] = ["todo", "in-progress", "done"];
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as TaskCategory[];
-
-const PRIORITY_CLASSES: Record<TaskPriority, string> = {
-  low: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  medium: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  high: "bg-red-500/10 text-red-600 border-red-500/20",
-};
-
-const STATUS_CLASSES: Record<TaskStatus, string> = {
-  todo: "bg-muted text-muted-foreground border-border",
-  "in-progress": "bg-primary/10 text-primary border-primary/20",
-  done: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-};
 
 export function EditTaskDialog({ task, onSave, onClose }: EditTaskDialogProps) {
   const [title, setTitle] = useState("");

@@ -1,66 +1,77 @@
-# Contributing Guide
+# 🤝 Contributing to Dev Studio
 
-## Getting Started
+> [!NOTE]
+> Thank you for considering contributing to Dev Studio! We want to make contributing as easy, transparent, and enjoyable as possible. Following these guidelines ensures that your contributions are merged quickly and smoothly.
 
-1. Fork the repository on GitHub
-2. Create a feature branch from `main`
-3. Make your changes
-4. Open a Pull Request
+---
 
-## Branch Naming
+## 🚀 Standard Pull Request Workflow
 
-| Type | Pattern |
-|---|---|
-| Feature | `feature/short-description` |
-| Bug fix | `fix/short-description` |
-| Docs | `docs/short-description` |
+1. **Fork** the repository and create your feature branch from the `main` branch.
+2. Make your **changes** in your local workspace.
+3. Ensure all automated validation steps **pass** (see [Validation Checklist](#-pre-commit-validation)).
+4. Open a **Pull Request** detailing what your changes do and why they are necessary.
 
-## Commit Messages
+---
 
-Use concise, descriptive messages with a prefix:
+## 📂 Git Conventions
 
+### 🌿 Branch Naming Style
+
+| Type | Branch Pattern | Example |
+|---|---|---|
+| ✨ **Feature** | `feature/short-description` | `feature/prompt-versioning` |
+| 🐛 **Bug Fix** | `fix/short-description` | `fix/date-serialization` |
+| 📝 **Documentation** | `docs/short-description` | `docs/update-architecture` |
+| ⚡ **Refactoring** | `refactor/short-description` | `refactor/clean-routes` |
+
+---
+
+### 📝 Commit Message Formatting
+
+We follow simple, descriptive commit prefixes. Use the imperative mood:
+
+```ini
+feat: add version history for prompts
+fix: resolve JWT session cookie expiration leak
+docs: document PostgreSQL connection credentials
+refactor: clean up duplicate route imports
+chore: upgrade package dependencies
 ```
-feat: add prompt versioning
-fix: resolve date serialization error
-docs: update architecture diagram
-refactor: simplify route handlers
-chore: update dependencies
-```
 
-## Code Style
+---
 
-- TypeScript everywhere — no `any` unless unavoidable
-- Follow the existing file and folder conventions
-- Run `npm run lint` and `npm run format` before committing
-- Keep components small and focused
+## 💅 Code Quality & Standards
 
-## Before Submitting a PR
+* **100% Type-Safe**: Use strict TypeScript definitions across the entire workspace. Avoid using `any` whenever possible.
+* **Component Cohesion**: Keep frontend components focused, small, and reusable. Avoid bloat.
+* **Pre-commit Formatting**: Always format and check code style using Prettier and ESLint.
+
+---
+
+## 🔍 Pre-commit Validation
+
+Before pushing branches or opening a Pull Request, you must run the following validation scripts in your terminal. All tests must pass:
 
 ```bash
-npm run lint       # must pass
-npx tsc --noEmit   # must pass
-npm run build      # must succeed
+# 1. Run the code syntax linter
+npm run lint
+
+# 2. Check strict type safety compiling
+npx tsc --noEmit
+
+# 3. Verify production compilation succeeds
+npm run build
 ```
 
-## Pull Request Checklist
+---
 
-- [ ] Lint and type check pass
-- [ ] Build succeeds
-- [ ] No unrelated changes included
-- [ ] Documentation updated if needed
+## 🏷️ PR Submission Checklist
 
-## Adding a New Asset Type
+When opening a Pull Request, check off the following requirements:
 
-1. Add the table to `shared/schema.ts`
-2. Run `npm run db:push`
-3. Add CRUD routes to `server/routes.ts`
-4. Add the API calls to `src/lib/api.ts`
-5. Add state and actions to `src/lib/store.ts`
-6. Create components in `src/components/`
-7. Add a route in `src/routes/`
-
-## Getting Help
-
-- Read the [docs](./README.md)
-- Open a [GitHub issue](https://github.com/firstall31-dot/Dev-Studio/issues)
-- Start a [discussion](https://github.com/firstall31-dot/Dev-Studio/discussions)
+- [ ] All linting checks pass successfully (`npm run lint`).
+- [ ] Strictly compiling TypeScript without errors (`npx tsc --noEmit`).
+- [ ] Production build succeeds cleanly (`npm run build`).
+- [ ] The change does not introduce unrelated logic or file edits.
+- [ ] Relevant documentation has been updated to reflect the change.

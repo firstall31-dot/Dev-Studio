@@ -12,20 +12,10 @@ import {
 } from "@/components/ui/select";
 import type { InterviewQuestion } from "@/types/skills";
 import type { FocusArea, Difficulty, AnswerDepth } from "@/types/common";
+import { DEPTH_LABEL_PRESETS, FOCUS_AREAS, DIFFICULTIES } from "@/constants";
 
-const DEPTH_LABEL_PRESETS = [
-  "Deep dive",
-  "Code example",
-  "Real-world scenario",
-  "Common mistake / Gotcha",
-  "Follow-up question",
-  "Step-by-step",
-  "Senior perspective",
-  "Custom…",
-];
-
-const AREAS: FocusArea[] = ["frontend", "backend", "devops", "testing", "database", "general"];
-const DIFFS: Difficulty[] = ["junior", "mid", "senior"];
+const AREAS = FOCUS_AREAS;
+const DIFFS = DIFFICULTIES;
 
 interface Props {
   open: boolean;

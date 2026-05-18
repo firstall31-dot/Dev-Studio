@@ -5,4 +5,8 @@ export {
   formatCountdown,
   formatTime12,
   formatMinutesLabel,
+  getWeekOfMonth,
+  getWeekTheme,
+  normCategory,
+  formatMinutes,
 } from "./utils/planner";

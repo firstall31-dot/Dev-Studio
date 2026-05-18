@@ -1,4 +1,3 @@
-import { User, Briefcase, GraduationCap, Code2, FolderGit2, Sparkles } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -10,15 +9,7 @@ import { CVProjectsSection } from "./cv-projects";
 import { ATSChecker } from "./ats-checker";
 import type { CVProfile, CVFocus } from "@/types/cv";
 import { FOCUS_LABELS } from "@/types/cv";
-
-const BUILDER_TABS = [
-  { id: "personal",   label: "Personal",   icon: User },
-  { id: "experience", label: "Experience", icon: Briefcase },
-  { id: "skills",     label: "Skills",     icon: Code2 },
-  { id: "education",  label: "Education",  icon: GraduationCap },
-  { id: "projects",   label: "Projects",   icon: FolderGit2 },
-  { id: "ats",        label: "ATS Check",  icon: Sparkles },
-] as const;
+import { BUILDER_TABS } from "@/constants";
 
 type BuilderTab = typeof BUILDER_TABS[number]["id"];
 

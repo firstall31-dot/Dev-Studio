@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, index } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, index, boolean } from "drizzle-orm/pg-core";
 
 export const authUsers = pgTable("auth_users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -7,6 +7,9 @@ export const authUsers = pgTable("auth_users", {
   googleId: text("google_id").unique(),
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
+  isVerified: boolean("is_verified").default(false).notNull(),
+  verificationToken: text("verification_token"),
+  verificationTokenExpires: timestamp("verification_token_expires"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [

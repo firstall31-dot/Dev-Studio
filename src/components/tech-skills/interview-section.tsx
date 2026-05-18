@@ -7,6 +7,7 @@ import { Input } from "@/components/tools/shared";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FocusArea } from "@/types/common";
 import type { SkillAreaData, InterviewQuestion } from "@/types/skills";
+import { DIFFICULTIES } from "@/constants";
 
 interface Props {
   data: SkillAreaData;
@@ -84,7 +85,7 @@ export function InterviewSection({ data, triggerAdd }: Props) {
         </div>
         <div className="hidden sm:block h-6 w-px bg-border mx-2" />
         <div className="flex flex-wrap gap-1">
-          {["all", "junior", "mid", "senior"].map((d) => (
+          {["all", ...DIFFICULTIES].map((d) => (
             <button
               key={d}
               onClick={() => setDiff(d)}

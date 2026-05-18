@@ -3,14 +3,13 @@ import { useState, useEffect } from "react";
 import {
   PageContainer, PageSection, PageHeader, TabNav, SplitLayout,
 } from "@/components/layout";
-import {
-  FileText, Save, User, Briefcase, GraduationCap, Code2, FolderGit2, Sparkles,
-} from "lucide-react";
+import { FileText, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForge, newId } from "@/lib/store";
 import { CVSidebar } from "@/components/cv/cv-sidebar";
 import { CVBuilder } from "@/components/cv/cv-builder";
 import type { CVProfile } from "@/types/cv";
+import { BUILDER_TABS } from "@/constants";
 
 export const Route = createFileRoute("/cv")({
   head: () => ({
@@ -19,16 +18,8 @@ export const Route = createFileRoute("/cv")({
   component: CVPage,
 });
 
-const BUILDER_TABS = [
-  { id: "personal",   label: "Personal",   icon: User },
-  { id: "experience", label: "Experience", icon: Briefcase },
-  { id: "skills",     label: "Skills",     icon: Code2 },
-  { id: "education",  label: "Education",  icon: GraduationCap },
-  { id: "projects",   label: "Projects",   icon: FolderGit2 },
-  { id: "ats",        label: "ATS Check",  icon: Sparkles },
-] as const;
-
 type BuilderTab = typeof BUILDER_TABS[number]["id"];
+
 
 function defaultCV(id: string): CVProfile {
   return {

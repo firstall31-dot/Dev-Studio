@@ -11,6 +11,8 @@ export interface InterviewQuestion {
   tags: string[];
   category?: string;
   favorite?: boolean;
+  isGlobal?: boolean;
+  userId?: string;
   createdAt: number;
 }
 

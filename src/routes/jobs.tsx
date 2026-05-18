@@ -21,11 +21,8 @@ export const Route = createFileRoute("/jobs")({
   component: JobsPage,
 });
 
-const TABS = [
-  { id: "jobs",     label: "Jobs" },
-  { id: "offers",   label: "Offers" },
-  { id: "services", label: "Services" },
-] as const;
+import { JOBS_TABS } from "@/constants";
+
 
 function mapJob(x: any): SavedJob {
   return {
@@ -78,21 +75,27 @@ function JobsPage() {
     try {
       const r = await fetch("/api/jobs/saved");
       if (r.ok) setJobs((await r.json()).map(mapJob));
-    } catch {}
+    } catch (err) {
+      console.warn("[jobs] Failed to load jobs:", err);
+    }
   }, []);
 
   const loadOffers = useCallback(async () => {
     try {
       const r = await fetch("/api/jobs/offers");
       if (r.ok) setOffers((await r.json()).map(mapOffer));
-    } catch {}
+    } catch (err) {
+      console.warn("[jobs] Failed to load offers:", err);
+    }
   }, []);
 
   const loadServices = useCallback(async () => {
     try {
       const r = await fetch("/api/jobs/services");
       if (r.ok) setServices((await r.json()).map(mapService));
-    } catch {}
+    } catch (err) {
+      console.warn("[jobs] Failed to load services:", err);
+    }
   }, []);
 
   useEffect(() => { loadJobs(); loadOffers(); loadServices(); }, [loadJobs, loadOffers, loadServices]);
@@ -192,11 +195,11 @@ function JobsPage() {
           className="mb-4"
         />
         <TabNav
-          tabs={[
-            { id: "jobs",     label: "Jobs",     badge: jobs.length || undefined,     onClick: () => navigate({ search: { tab: "jobs" } }) },
-            { id: "offers",   label: "Offers",   badge: offers.length || undefined,   onClick: () => navigate({ search: { tab: "offers" } }) },
-            { id: "services", label: "Services", badge: services.length || undefined, onClick: () => navigate({ search: { tab: "services" } }) },
-          ]}
+          tabs={JOBS_TABS.map((t) => ({
+            ...t,
+            badge: t.id === "jobs" ? jobs.length : t.id === "offers" ? offers.length : services.length || undefined,
+            onClick: () => navigate({ search: { tab: t.id } }),
+          }))}
           activeTab={tab}
         />
       </PageSection>

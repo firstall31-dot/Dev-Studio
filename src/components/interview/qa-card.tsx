@@ -3,20 +3,7 @@ import { ChevronDown, ChevronUp, Star, Copy, Pencil, Trash2, ChevronRight } from
 import { toast } from "sonner";
 import type { InterviewQuestion } from "@/types/skills";
 
-const DIFF_COLORS: Record<string, string> = {
-  junior: "bg-primary/10 text-primary border-primary/20",
-  mid: "bg-primary/10 text-primary border-primary/20",
-  senior: "bg-primary/10 text-primary border-primary/20",
-};
-
-const DEPTH_COLORS = [
-  "border-primary/30 bg-primary/5 text-primary",
-  "border-primary/40 bg-primary/10 text-primary",
-  "border-primary/50 bg-primary/15 text-primary",
-  "border-primary/60 bg-primary/20 text-primary",
-  "border-primary/70 bg-primary/25 text-primary",
-  "border-primary/80 bg-primary/30 text-primary",
-];
+import { DIFF_COLORS, DEPTH_COLORS } from "@/constants";
 
 interface Props {
   item: InterviewQuestion;
