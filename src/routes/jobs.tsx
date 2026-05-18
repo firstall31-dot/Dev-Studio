@@ -58,11 +58,6 @@ function mapService(x: any): MyService {
   };
 }
 
-const tabDescriptions: Record<string, string> = {
-  jobs:     "Browse live remote jobs and track your applications.",
-  offers:   "Track freelance offers from Mostaql, Upwork, Freelancer and more.",
-  services: "Manage your service listings on Fiverr, Mostaql, Khamsat and others.",
-};
 
 function JobsPage() {
   const { tab = "jobs" } = Route.useSearch();
@@ -194,7 +189,6 @@ function JobsPage() {
           icon={Briefcase}
           eyebrow="Freelance"
           title="Jobs & Freelance"
-          description={tabDescriptions[tab]}
           className="mb-4"
         />
         <TabNav

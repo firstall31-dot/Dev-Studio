@@ -1,5 +1,7 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { SoftSkillView } from "@/components/soft-skills/soft-skill-view";
+import { SoftSkillTabs } from "@/components/soft-skills/soft-skill-tabs";
+import { MockChatView } from "@/components/ai-mock/mock-chat-view";
 import { PageHeader, PageContainer, PageSection } from "@/components/layout";
 import { Heart } from "lucide-react";
 import { z } from "zod";
@@ -8,14 +10,10 @@ const searchSchema = z.object({
   tab: z
     .enum([
       "communication",
-      "speaking",
-      "negotiation",
       "leadership",
       "problem-solving",
       "teamwork",
-      "time",
-      "growth",
-      "mental-models",
+      "ai-mock",
     ])
     .optional()
     .default("communication"),
@@ -41,12 +39,17 @@ function SoftSkillsPage() {
         <PageHeader
           icon={Heart}
           title="Communication & Soft Skills"
-          description="Master the art of collaboration, leadership, and emotional intelligence."
+          className="mb-4"
         />
+        <SoftSkillTabs />
       </PageSection>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <SoftSkillView activeTab={tab} />
+        {tab === "ai-mock" ? (
+          <MockChatView context="soft" />
+        ) : (
+          <SoftSkillView activeTab={tab} />
+        )}
       </div>
     </PageContainer>
   );

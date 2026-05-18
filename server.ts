@@ -20,6 +20,15 @@ const app = express();
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("dev"));
+
+if (!isProd) {
+  app.use((_req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
+  });
+}
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
@@ -42,7 +51,13 @@ if (isProd) {
   });
 } else {
   const vite = await createViteServer({
-    server: { middlewareMode: true },
+    server: {
+      middlewareMode: true,
+      hmr: {
+        clientPort: 443,
+        host: process.env.REPLIT_DEV_DOMAIN,
+      },
+    },
     appType: "spa",
   });
   app.use(vite.middlewares);

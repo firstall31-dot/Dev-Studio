@@ -72,7 +72,6 @@ function ConnectorsPage() {
         <PageHeader
           icon={Users}
           title="Connectors"
-          description="Manage your professional network, clients, and company contacts."
           className="mb-4"
         />
         <TabNav

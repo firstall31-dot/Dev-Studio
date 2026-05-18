@@ -1,4 +1,4 @@
-modules = ["web", "nodejs-22"]
+modules = ["nodejs-20", "web"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -48,4 +48,4 @@ run = ["node", "--import", "tsx/esm", "server.ts"]
 [userenv]
 
 [userenv.shared]
-JWT_SECRET = "b5f03356f3138ad3969ad05f0ef38622d6154aec8a3eeff25e7d94fc105c511ce2305804803477e41ac3bc92058df8cf"
+JWT_SECRET = "64d09da2f5b684c233f7a522cde1fb756e8550257e7a9ae637eb51e8c653970cc560e1571502f91dac59218a1f60e9a4dfa88e2a82357e0abadc778df4a5dee0"

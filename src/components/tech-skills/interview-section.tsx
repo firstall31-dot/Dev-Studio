@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
 import { useForge } from "@/lib/store";
 import { QACard } from "@/components/interview/qa-card";
@@ -10,9 +10,10 @@ import type { SkillAreaData, InterviewQuestion } from "@/types/skills";
 
 interface Props {
   data: SkillAreaData;
+  triggerAdd?: number;
 }
 
-export function InterviewSection({ data }: Props) {
+export function InterviewSection({ data, triggerAdd }: Props) {
   const { interviewQuestions, toggleFavoriteInterviewQuestion, deleteInterviewQuestion } =
     useForge();
 
@@ -22,6 +23,10 @@ export function InterviewSection({ data }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingQ, setEditingQ] = useState<InterviewQuestion | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (triggerAdd) { setEditingQ(null); setDialogOpen(true); }
+  }, [triggerAdd]);
 
   const filteredQs = useMemo(
     () =>

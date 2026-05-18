@@ -47,7 +47,6 @@ function ToolsPage() {
           icon={Package}
           eyebrow="Asset Library"
           title="Tools & Assets"
-          description="A unified dashboard for all your prompts, agents, and reusable building blocks."
           className="mb-4"
         />
         <TabNav

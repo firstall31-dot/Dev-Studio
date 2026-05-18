@@ -99,7 +99,6 @@ function CVPage() {
         <PageHeader
           icon={FileText}
           title="CV Builder"
-          description="Create tailored CVs for each role and check ATS compatibility before applying."
           className="mb-4"
           actions={
             draft ? (

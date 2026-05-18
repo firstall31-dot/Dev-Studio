@@ -14,7 +14,19 @@ export interface InterviewQuestion {
   createdAt: number;
 }
 
-export type TechAreaId = "frontend" | "backend" | "devops" | "testing" | "database";
+export type TechAreaId =
+  | "frontend"
+  | "backend"
+  | "devops"
+  | "testing"
+  | "database"
+  | "design-patterns"
+  | "architecture"
+  | "system-design"
+  | "microservices"
+  | "security"
+  | "performance";
+
 export type SoftAreaId = "softskills";
 export type AreaId = TechAreaId | SoftAreaId;
 
@@ -42,6 +54,7 @@ export interface SkillAreaData {
   concepts: SkillConcept[];
   resources: SkillResource[];
   checklist: SkillChecklistItem[];
+  subAreasLabel?: string;
   subAreas?: {
     id: string;
     label: string;

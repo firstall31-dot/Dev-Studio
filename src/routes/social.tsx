@@ -70,7 +70,6 @@ function SocialPage() {
         <PageHeader
           icon={Share2}
           title="Social Media"
-          description="Manage your posts, threads, and updates across all social platforms."
           className="mb-4"
         />
         <TabNav

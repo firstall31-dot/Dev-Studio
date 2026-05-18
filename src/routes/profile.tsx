@@ -59,7 +59,6 @@ function ProfilePage() {
           icon={User}
           eyebrow="Account"
           title="Profile"
-          description="Your Dev Studio profile and account settings."
         />
       </PageSection>
       <div className="flex-1 min-h-0 rounded-2xl border border-border/60 bg-card overflow-y-auto p-4 sm:p-8">

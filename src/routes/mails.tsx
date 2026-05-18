@@ -70,7 +70,6 @@ function MailsPage() {
         <PageHeader
           icon={Mail}
           title="Communication Hub"
-          description="Manage your professional emails, cover letters, and outreach templates."
           className="mb-4"
         />
         <TabNav

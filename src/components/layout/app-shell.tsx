@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, type ReactNode } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Sparkles, Bot, Component as ComponentIcon,
-  LayoutTemplate, Code2, Plus, Flame, Code, Heart, GraduationCap,
+  LayoutTemplate, Code2, Plus, Flame, Code, Heart,
   Menu, X, Search, Users, Briefcase, FileText, CalendarDays,
   Sun, Moon, Bell, Languages, CheckCheck, Trash2, Info, CalendarCheck,
 } from "lucide-react";
@@ -271,16 +271,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                     const active = item.match.some((p) => pathname.startsWith(p));
                     return <NavItem key={item.label} item={item} active={active} isCollapsed={isCollapsed} />;
                   })}
-                </ul>
-              </div>
-              <div>
-                <SectionLabel label="Resources" isCollapsed={isCollapsed} />
-                <ul className="space-y-0.5">
-                  <NavItem
-                    item={{ to: "/interview", label: "Interview", icon: GraduationCap }}
-                    active={pathname.startsWith("/interview")}
-                    isCollapsed={isCollapsed}
-                  />
                 </ul>
               </div>
             </div>
