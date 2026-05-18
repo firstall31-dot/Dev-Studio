@@ -1,20 +1,6 @@
-export interface Scenario {
-  id: string;
-  title: string;
-  situation: string;
-  task: string;
-  action: string;
-  result: string;
-  createdAt: number;
-}
+import type { Scenario, Question } from "../../types/skills";
 
-export interface Question {
-  id: string;
-  title: string;
-  guide: string;
-  scenarios: Scenario[];
-  isDefault?: boolean;
-}
+export type { Scenario, Question };
 
 export const DEFAULT_QUESTIONS: Omit<Question, "scenarios">[] = [
   {

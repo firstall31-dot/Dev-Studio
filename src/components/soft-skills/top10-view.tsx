@@ -32,7 +32,7 @@ export function Top10QuestionsView() {
   /* ── CRUD helpers ────────────────────────────────────────── */
   const addQuestion = (title: string, guide: string) => {
     const id = newId();
-    upsertInterviewQuestion({ id, question: title.trim(), answer: guide.trim(), area: "softskills", difficulty: "mid", tags: ["behavioral"], answerDepths: [] as any, isGlobal: false, createdAt: new Date().toISOString() as any });
+    upsertInterviewQuestion({ id, question: title.trim(), answer: guide.trim(), area: "softskills", difficulty: "mid", tags: ["behavioral"], answerDepths: [] as any, isGlobal: false, createdAt: Date.now() });
     return id;
   };
 
@@ -65,7 +65,7 @@ export function Top10QuestionsView() {
 
   const addSuggested = (s: (typeof SUGGESTED_QUESTIONS)[number]) => {
     if (questions.some((q) => q.id === s.id)) return s.id;
-    upsertInterviewQuestion({ id: s.id, question: s.title, answer: s.guide, area: "softskills", difficulty: "mid", tags: ["behavioral"], answerDepths: [] as any, isGlobal: false, createdAt: new Date().toISOString() as any });
+    upsertInterviewQuestion({ id: s.id, question: s.title, answer: s.guide, area: "softskills", difficulty: "mid", tags: ["behavioral"], answerDepths: [] as any, isGlobal: false, createdAt: Date.now() });
     return s.id;
   };
 

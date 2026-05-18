@@ -1,11 +1,29 @@
 import { ElementType } from "react";
 import { FocusArea, Difficulty, AnswerDepth } from "./common";
 
+export interface Scenario {
+  id: string;
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  createdAt: number;
+}
+
+export interface Question {
+  id: string;
+  title: string;
+  guide: string;
+  scenarios: Scenario[];
+  isDefault?: boolean;
+}
+
 export interface InterviewQuestion {
   id: string;
   question: string;
   answer: string;
-  answerDepths?: AnswerDepth[];
+  answerDepths?: any[];
   area: FocusArea;
   difficulty: Difficulty;
   tags: string[];
