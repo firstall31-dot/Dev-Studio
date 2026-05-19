@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Trash2, ExternalLink, Handshake } from "lucide-react";
-import type { FreelanceOffer } from "./types";
+import type { FreelanceOffer, OfferStatus } from "./types";
 import { OFFER_STATUSES, OFFER_PLATFORMS } from "./types";
 import { toast } from "sonner";
 
@@ -170,7 +170,7 @@ export function OfferEditor({ offer, isNew, onSave, onDelete }: Props) {
               <select
                 className={inp}
                 value={form.status ?? "new"}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as OfferStatus }))}
               >
                 {OFFER_STATUSES.map((s) => (
                   <option key={s} value={s}>

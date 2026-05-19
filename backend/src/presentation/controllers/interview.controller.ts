@@ -32,7 +32,9 @@ export const postQuestionsBulk = async (req: Request, res: Response) => {
     const result = await InterviewService.createQuestionsBulk(uid, items);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to create bulk interview questions" });
+    res
+      .status(500)
+      .json({ error: "Failed to create bulk interview questions" });
   }
 };
 
@@ -64,7 +66,12 @@ export const postProgressToggle = async (req: Request, res: Response) => {
   if (!uid) return;
   const { itemId, areaId, completed } = req.body;
   try {
-    const result = await InterviewService.toggleProgress(uid, itemId, areaId, completed);
+    const result = await InterviewService.toggleProgress(
+      uid,
+      itemId,
+      areaId,
+      completed,
+    );
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to toggle progress" });

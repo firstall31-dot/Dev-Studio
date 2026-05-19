@@ -158,7 +158,9 @@ describe("Auth Controller", () => {
           isVerified: false,
         },
       ]);
-      dbMock.where.mockResolvedValueOnce([{}]); // For the update query where
+      dbMock.where.mockReturnValueOnce({
+        returning: vi.fn().mockResolvedValueOnce([{}]),
+      }); // For the update query where
 
       await login(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(403);

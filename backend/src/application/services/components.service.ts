@@ -1,11 +1,11 @@
-import { db } from "../../infrastructure/database/index.js";
 import { components } from "../../domain/schema.js";
 import { eq, and } from "drizzle-orm";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class ComponentsService {
   static async getAll(userId: string) {
-    return await db.select().from(components).where(eq(components.userId, userId));
+    return await uow.components.findAll(eq(components.userId, userId));
   }
 
   static async create(userId: string, rawData: any) {
@@ -13,28 +13,20 @@ export class ComponentsService {
     const data = stripDates(raw);
     const safeId = isUUID(id) ? id : undefined;
     const existing = safeId
-      ? await db
-          .select()
-          .from(components)
-          .where(and(eq(components.id, safeId), eq(components.userId, userId)))
+      ? await uow.components.findAll(
+          and(eq(components.id, safeId), eq(components.userId, userId))
+        )
       : [];
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(components)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(components.id, safeId!))
-        .returning();
+      const r = await uow.components.update(safeId!, data);
       return r;
     } else {
-      const [r] = await db
-        .insert(components)
-        .values({
-          ...data,
-          userId,
-          ...(safeId ? { id: safeId } : {}),
-        } as any)
-        .returning();
+      const r = await uow.components.create({
+        ...data,
+        userId,
+        ...(safeId ? { id: safeId } : {}),
+      } as any);
       return r;
     }
   }
@@ -48,21 +40,18 @@ export class ComponentsService {
       const safeId = isUUID(id) ? id : undefined;
       return { ...data, userId, ...(safeId ? { id: safeId } : {}) } as any;
     });
-    
-    return await db
-      .insert(components)
-      .values(values)
-      .onConflictDoNothing()
-      .returning();
+
+    return await uow.components.createMany(values);
   }
 
   static async deleteById(userId: string, id: string) {
     if (!isUUID(id)) {
       return true;
     }
-    await db
-      .delete(components)
-      .where(and(eq(components.id, id), eq(components.userId, userId)));
+    const comp = await uow.components.findById(id);
+    if (comp && comp.userId === userId) {
+      await uow.components.delete(id);
+    }
     return true;
   }
 }

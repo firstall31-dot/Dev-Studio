@@ -18,7 +18,11 @@ export const create = async (req: Request, res: Response) => {
   if (!uid) return;
   const { displayName, avatarUrl, location } = req.body;
   try {
-    const result = await ProfileService.upsert(uid, { displayName, avatarUrl, location });
+    const result = await ProfileService.upsert(uid, {
+      displayName,
+      avatarUrl,
+      location,
+    });
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to update profile" });

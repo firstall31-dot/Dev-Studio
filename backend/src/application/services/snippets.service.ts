@@ -1,11 +1,11 @@
-import { db } from "../../infrastructure/database/index.js";
 import { snippets } from "../../domain/schema.js";
 import { eq, and } from "drizzle-orm";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class SnippetsService {
   static async getAll(userId: string) {
-    return await db.select().from(snippets).where(eq(snippets.userId, userId));
+    return await uow.snippets.findAll(eq(snippets.userId, userId));
   }
 
   static async create(userId: string, rawData: any) {
@@ -13,28 +13,20 @@ export class SnippetsService {
     const data = stripDates(raw);
     const safeId = isUUID(id) ? id : undefined;
     const existing = safeId
-      ? await db
-          .select()
-          .from(snippets)
-          .where(and(eq(snippets.id, safeId), eq(snippets.userId, userId)))
+      ? await uow.snippets.findAll(
+          and(eq(snippets.id, safeId), eq(snippets.userId, userId))
+        )
       : [];
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(snippets)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(snippets.id, safeId!))
-        .returning();
+      const r = await uow.snippets.update(safeId!, data);
       return r;
     } else {
-      const [r] = await db
-        .insert(snippets)
-        .values({
-          ...data,
-          userId,
-          ...(safeId ? { id: safeId } : {}),
-        } as any)
-        .returning();
+      const r = await uow.snippets.create({
+        ...data,
+        userId,
+        ...(safeId ? { id: safeId } : {}),
+      } as any);
       return r;
     }
   }
@@ -48,21 +40,18 @@ export class SnippetsService {
       const safeId = isUUID(id) ? id : undefined;
       return { ...data, userId, ...(safeId ? { id: safeId } : {}) } as any;
     });
-    
-    return await db
-      .insert(snippets)
-      .values(values)
-      .onConflictDoNothing()
-      .returning();
+
+    return await uow.snippets.createMany(values);
   }
 
   static async deleteById(userId: string, id: string) {
     if (!isUUID(id)) {
       return true;
     }
-    await db
-      .delete(snippets)
-      .where(and(eq(snippets.id, id), eq(snippets.userId, userId)));
+    const snip = await uow.snippets.findById(id);
+    if (snip && snip.userId === userId) {
+      await uow.snippets.delete(id);
+    }
     return true;
   }
 }

@@ -1,11 +1,11 @@
-import { db } from "../../infrastructure/database/index.js";
 import { agents } from "../../domain/schema.js";
 import { eq, and } from "drizzle-orm";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class AgentsService {
   static async getAll(userId: string) {
-    return await db.select().from(agents).where(eq(agents.userId, userId));
+    return await uow.agents.findAll(eq(agents.userId, userId));
   }
 
   static async create(userId: string, rawData: any) {
@@ -13,28 +13,20 @@ export class AgentsService {
     const data = stripDates(raw);
     const safeId = isUUID(id) ? id : undefined;
     const existing = safeId
-      ? await db
-          .select()
-          .from(agents)
-          .where(and(eq(agents.id, safeId), eq(agents.userId, userId)))
+      ? await uow.agents.findAll(
+          and(eq(agents.id, safeId), eq(agents.userId, userId))
+        )
       : [];
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(agents)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(agents.id, safeId!))
-        .returning();
+      const r = await uow.agents.update(safeId!, data);
       return r;
     } else {
-      const [r] = await db
-        .insert(agents)
-        .values({
-          ...data,
-          userId,
-          ...(safeId ? { id: safeId } : {}),
-        } as any)
-        .returning();
+      const r = await uow.agents.create({
+        ...data,
+        userId,
+        ...(safeId ? { id: safeId } : {}),
+      } as any);
       return r;
     }
   }
@@ -48,21 +40,18 @@ export class AgentsService {
       const safeId = isUUID(id) ? id : undefined;
       return { ...data, userId, ...(safeId ? { id: safeId } : {}) } as any;
     });
-    
-    return await db
-      .insert(agents)
-      .values(values)
-      .onConflictDoNothing()
-      .returning();
+
+    return await uow.agents.createMany(values);
   }
 
   static async deleteById(userId: string, id: string) {
     if (!isUUID(id)) {
       return true;
     }
-    await db
-      .delete(agents)
-      .where(and(eq(agents.id, id), eq(agents.userId, userId)));
+    const agent = await uow.agents.findById(id);
+    if (agent && agent.userId === userId) {
+      await uow.agents.delete(id);
+    }
     return true;
   }
 }

@@ -1,51 +1,15 @@
-import { db } from "../../infrastructure/database/index.js";
+
 import { cvProfiles } from "../../domain/schema.js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { getOpenAI } from "../../infrastructure/lib/openai.js";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
+import { CVMapper } from "../../domain/mappers/cv.mapper.js";
 
 export class CVService {
-  static parseCVRow(row: any) {
-    if (!row) return row;
-    try {
-      return {
-        ...row,
-        personalInfo:
-          typeof row.personalInfo === "string"
-            ? JSON.parse(row.personalInfo)
-            : row.personalInfo || {},
-        experience:
-          typeof row.experience === "string"
-            ? JSON.parse(row.experience)
-            : row.experience || [],
-        skills:
-          typeof row.skills === "string"
-            ? JSON.parse(row.skills)
-            : row.skills || {},
-        education:
-          typeof row.education === "string"
-            ? JSON.parse(row.education)
-            : row.education || [],
-        projects:
-          typeof row.projects === "string"
-            ? JSON.parse(row.projects)
-            : row.projects || [],
-        languages:
-          typeof row.languages === "string"
-            ? JSON.parse(row.languages)
-            : row.languages || [],
-      };
-    } catch (err) {
-      return row;
-    }
-  }
-
   static async getAll(userId: string) {
-    const rows = await db
-      .select()
-      .from(cvProfiles)
-      .where(eq(cvProfiles.userId, userId));
-    return rows.map(CVService.parseCVRow);
+    const rows = await uow.cvProfiles.findAll(eq(cvProfiles.userId, userId));
+    return rows.map(CVMapper.toDomain);
   }
 
   static async create(userId: string, rawData: any) {
@@ -70,40 +34,33 @@ export class CVService {
       projects: JSON.stringify(projects || []),
       languages: JSON.stringify(languages || []),
     };
-    
+
     const safeId = isUUID(id) ? id : undefined;
     const existing = safeId
-      ? await db
-          .select()
-          .from(cvProfiles)
-          .where(and(eq(cvProfiles.id, safeId), eq(cvProfiles.userId, userId)))
+      ? await uow.cvProfiles.findAll(
+          and(eq(cvProfiles.id, safeId), eq(cvProfiles.userId, userId))
+        )
       : [];
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(cvProfiles)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(cvProfiles.id, safeId!))
-        .returning();
-      return CVService.parseCVRow(r);
+      const r = await uow.cvProfiles.update(safeId!, data);
+      return CVMapper.toDomain(r);
     } else {
-      const [r] = await db
-        .insert(cvProfiles)
-        .values({
-          ...data,
-          userId,
-          ...(safeId ? { id: safeId } : {}),
-        } as any)
-        .returning();
-      return CVService.parseCVRow(r);
+      const r = await uow.cvProfiles.create({
+        ...data,
+        userId,
+        ...(safeId ? { id: safeId } : {}),
+      } as any);
+      return CVMapper.toDomain(r);
     }
   }
 
   static async deleteById(userId: string, id: string) {
     if (!isUUID(id)) return true;
-    await db
-      .delete(cvProfiles)
-      .where(and(eq(cvProfiles.id, id), eq(cvProfiles.userId, userId)));
+    const cv = await uow.cvProfiles.findById(id);
+    if (cv && cv.userId === userId) {
+      await uow.cvProfiles.delete(id);
+    }
     return true;
   }
 
@@ -183,7 +140,7 @@ Be precise, actionable, and focus on what matters for ATS systems (keyword densi
 
   static parsePdf(fileBase64: string) {
     if (!fileBase64) throw new Error("fileBase64 required");
-    
+
     const buffer = Buffer.from(fileBase64, "base64");
     const pdfStr = buffer.toString("latin1");
 

@@ -1,11 +1,47 @@
+import type {
+  JobStatus,
+  OfferStatus,
+  ServiceStatus,
+  JobPlatform,
+  OfferPlatform,
+  ServicePlatform,
+} from "@shared/enums";
+
+import {
+  JOB_STATUSES,
+  OFFER_STATUSES,
+  SERVICE_STATUSES,
+  JOB_PLATFORMS,
+  OFFER_PLATFORMS,
+  SERVICE_PLATFORMS,
+} from "@shared/enums";
+
+export type {
+  JobStatus,
+  OfferStatus,
+  ServiceStatus,
+  JobPlatform,
+  OfferPlatform,
+  ServicePlatform,
+};
+
+export {
+  JOB_STATUSES,
+  OFFER_STATUSES,
+  SERVICE_STATUSES,
+  JOB_PLATFORMS,
+  OFFER_PLATFORMS,
+  SERVICE_PLATFORMS,
+};
+
 export interface SavedJob {
   id: string;
   title: string;
   company: string;
   location: string;
   url: string;
-  platform: string;
-  status: string;
+  platform: JobPlatform | string;
+  status: JobStatus;
   salary: string;
   remote: boolean;
   tags: string[];
@@ -18,10 +54,10 @@ export interface FreelanceOffer {
   id: string;
   title: string;
   client: string;
-  platform: string;
+  platform: OfferPlatform | string;
   budget: string;
   currency: string;
-  status: string;
+  status: OfferStatus;
   description: string;
   url: string;
   deadline: string;
@@ -34,12 +70,12 @@ export interface FreelanceOffer {
 export interface MyService {
   id: string;
   title: string;
-  platform: string;
+  platform: ServicePlatform | string;
   url: string;
   category: string;
   price: string;
   currency: string;
-  status: string;
+  status: ServiceStatus;
   description: string;
   deliveryDays: number;
   tags: string[];
@@ -62,39 +98,6 @@ export interface RemoteJob {
   description?: string;
 }
 
-export const JOB_STATUSES = ["saved", "applied", "interview", "offer", "rejected"] as const;
-export const OFFER_STATUSES = ["new", "in_review", "accepted", "rejected", "completed"] as const;
-export const SERVICE_STATUSES = ["active", "paused", "draft"] as const;
-
-export const JOB_PLATFORMS = [
-  "LinkedIn",
-  "Indeed",
-  "Glassdoor",
-  "RemoteOK",
-  "Upwork",
-  "We Work Remotely",
-  "AngelList",
-  "Other",
-];
-export const OFFER_PLATFORMS = [
-  "Mostaql",
-  "Upwork",
-  "Freelancer",
-  "Khamsat",
-  "Toptal",
-  "PeoplePerHour",
-  "Fiverr",
-  "Other",
-];
-export const SERVICE_PLATFORMS = [
-  "Fiverr",
-  "Mostaql",
-  "Khamsat",
-  "Upwork",
-  "PeoplePerHour",
-  "Freelancer",
-  "Other",
-];
 
 export const STATUS_COLORS: Record<string, string> = {
   saved: "bg-blue-500/15 text-blue-400 border-blue-500/20",

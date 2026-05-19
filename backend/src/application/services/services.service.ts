@@ -1,39 +1,35 @@
-import { db } from "../../infrastructure/database/index.js";
 import { myServices } from "../../domain/schema.js";
 import { eq, and } from "drizzle-orm";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class MyServicesService {
   static async getAll(userId: string) {
-    return await db.select().from(myServices).where(eq(myServices.userId, userId));
+    return await uow.myServices.findAll(eq(myServices.userId, userId));
   }
 
   static async create(userId: string, rawData: any) {
     const { id, ...raw } = rawData;
     const data = stripDates(raw);
     const safeId = isUUID(id) ? id : undefined;
-    
+
     if (safeId) {
-      const existing = await db
-        .select()
-        .from(myServices)
-        .where(and(eq(myServices.id, safeId), eq(myServices.userId, userId)));
-        
+      const existing = await uow.myServices.findAll(
+        and(eq(myServices.id, safeId), eq(myServices.userId, userId))
+      );
+
       if (existing.length > 0) {
-        const [r] = await db
-          .update(myServices)
-          .set({ ...data, updatedAt: new Date() })
-          .where(eq(myServices.id, safeId))
-          .returning();
+        const r = await uow.myServices.update(safeId, data);
         return r;
       }
     }
-    
-    const [r] = await db
-      .insert(myServices)
-      .values({ ...data, userId, ...(safeId ? { id: safeId } : {}) } as any)
-      .returning();
-      
+
+    const r = await uow.myServices.create({
+      ...data,
+      userId,
+      ...(safeId ? { id: safeId } : {}),
+    } as any);
+
     return r;
   }
 
@@ -41,9 +37,10 @@ export class MyServicesService {
     if (!isUUID(id)) {
       return true;
     }
-    await db
-      .delete(myServices)
-      .where(and(eq(myServices.id, id), eq(myServices.userId, userId)));
+    const serv = await uow.myServices.findById(id);
+    if (serv && serv.userId === userId) {
+      await uow.myServices.delete(id);
+    }
     return true;
   }
 }

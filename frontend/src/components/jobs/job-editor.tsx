@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, ExternalLink, Loader2, Trash2 } from "lucide-react";
-import type { SavedJob } from "./types";
+import type { SavedJob, JobStatus } from "./types";
 import { JOB_STATUSES, JOB_PLATFORMS } from "./types";
 import { JobBrowser } from "./job-browser";
 import { toast } from "sonner";
@@ -152,7 +152,7 @@ export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }
               <select
                 className={inp}
                 value={form.status ?? "saved"}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as JobStatus }))}
               >
                 {JOB_STATUSES.map((s) => (
                   <option key={s} value={s}>

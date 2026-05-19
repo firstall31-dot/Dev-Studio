@@ -21,8 +21,11 @@ export const create = async (req: Request, res: Response) => {
     const data = await PlannerService.create(uid, req.body);
     res.json(data);
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Failed to create task";
-    res.status(error instanceof Error && msg.includes("required") ? 400 : 500).json({ error: msg });
+    const msg =
+      error instanceof Error ? error.message : "Failed to create task";
+    res
+      .status(error instanceof Error && msg.includes("required") ? 400 : 500)
+      .json({ error: msg });
   }
 };
 

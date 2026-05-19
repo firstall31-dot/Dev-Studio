@@ -1,4 +1,8 @@
-export type CVFocus = "frontend" | "backend" | "fullstack" | "general";
+import type { CVFocus, CVLanguageLevel } from "@shared/enums";
+import { CV_FOCUSES, CV_LANGUAGE_LEVELS } from "@shared/enums";
+
+export type { CVFocus, CVLanguageLevel };
+export { CV_FOCUSES };
 
 export interface CVPersonalInfo {
   name: string;
@@ -54,7 +58,7 @@ export interface CVSkills {
 export interface CVLanguage {
   id: string;
   language: string;
-  level: "native" | "fluent" | "advanced" | "intermediate" | "basic";
+  level: CVLanguageLevel;
 }
 
 export interface CVProfile {
@@ -189,4 +193,4 @@ export const FOCUS_KEYWORDS: Record<CVFocus, string[]> = {
   ],
 };
 
-export const LANGUAGE_LEVELS = ["native", "fluent", "advanced", "intermediate", "basic"] as const;
+export const LANGUAGE_LEVELS = CV_LANGUAGE_LEVELS;

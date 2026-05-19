@@ -1,4 +1,4 @@
-export type { SavedJob, FreelanceOffer, MyService, RemoteJob } from "../../types/jobs";
+export type { SavedJob, FreelanceOffer, MyService, RemoteJob, JobStatus, OfferStatus, ServiceStatus } from "../../types/jobs";
 
 export {
   JOB_STATUSES,

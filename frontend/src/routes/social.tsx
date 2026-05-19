@@ -8,6 +8,7 @@ import { SocialSidebar } from "@/components/social/social-sidebar";
 import { PostEditor } from "@/components/social/post-editor";
 import type { SocialDraft } from "@/types/tools";
 import { SOCIAL_TABS } from "@/constants";
+import { SocialPlatform } from "@shared/enums";
 
 const socialSearchSchema = z.object({
   tab: z.string().optional(),
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/social")({
 function SocialPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const tab = search.tab || "linkedin";
+  const tab = (search.tab || "linkedin") as SocialPlatform;
 
   const { socialDrafts, upsertSocialDraft, deleteSocialDraft } = useForge();
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);

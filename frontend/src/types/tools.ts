@@ -1,3 +1,5 @@
+import type { AgentStatus, ConnectorType, SocialPlatform, MailChannel } from "@shared/enums";
+
 export interface Prompt {
   id: string;
   title: string;
@@ -22,7 +24,7 @@ export interface Agent {
   tools: string[];
   model: string;
   temperature: number;
-  status: "active" | "idle" | "draft";
+  status: AgentStatus;
   tags: string[];
   createdAt: number;
   updatedAt: number;
@@ -50,6 +52,7 @@ export interface Template {
   tags: string[];
   structure: string;
   notes: string;
+  files?: { path: string; content: string }[];
   createdAt: number;
   updatedAt: number;
 }
@@ -67,7 +70,7 @@ export interface Snippet {
 
 export interface Connector {
   id: string;
-  type: string; // companies, hr, clients
+  type: ConnectorType; // companies, hr, clients
   name: string;
   email?: string;
   phone?: string;
@@ -78,7 +81,7 @@ export interface Connector {
 
 export interface SocialDraft {
   id: string;
-  platform: string; // linkedin, twitter, instagram
+  platform: SocialPlatform; // linkedin, twitter, instagram
   content: string;
   mediaUrls: string[];
   createdAt: number;
@@ -87,7 +90,7 @@ export interface SocialDraft {
 
 export interface MailTemplate {
   id: string;
-  channel: string; // cover-letter, gmail, whatsapp
+  channel: MailChannel; // cover-letter, gmail, whatsapp
   subject?: string;
   content: string;
   createdAt: number;

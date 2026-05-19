@@ -17,24 +17,7 @@ export const createIntegrationSlice: StateCreator<
         : [conn, ...s.connectors],
     }));
     try {
-      const saved = await db.upsertConnector({
-        ...conn,
-        user_id: "",
-        type: conn.type as
-          | "github"
-          | "gitlab"
-          | "jira"
-          | "notion"
-          | "linear"
-          | "slack"
-          | "figma"
-          | "sentry"
-          | "postgres"
-          | "vercel"
-          | "redis"
-          | "aws"
-          | "docker",
-      } as Parameters<typeof db.upsertConnector>[0]);
+      const saved = await db.upsertConnector(conn);
       if (saved?.id && saved.id !== conn.id) {
         set((s) => ({
           connectors: s.connectors.map((x) =>
@@ -69,18 +52,7 @@ export const createIntegrationSlice: StateCreator<
         : [draft, ...s.socialDrafts],
     }));
     try {
-      const saved = await db.upsertSocialDraft({
-        ...draft,
-        user_id: "",
-        platform: draft.platform as
-          | "twitter"
-          | "linkedin"
-          | "devto"
-          | "medium"
-          | "hashnode"
-          | "github",
-        media_urls: draft.mediaUrls,
-      } as Parameters<typeof db.upsertSocialDraft>[0]);
+      const saved = await db.upsertSocialDraft(draft);
       if (saved?.id && saved.id !== draft.id) {
         set((s) => ({
           socialDrafts: s.socialDrafts.map((x) =>
@@ -115,11 +87,7 @@ export const createIntegrationSlice: StateCreator<
         : [mail, ...s.mailTemplates],
     }));
     try {
-      const saved = await db.upsertMailTemplate({
-        ...mail,
-        user_id: "",
-        channel: mail.channel as "slack" | "email" | "discord" | "telegram",
-      } as Parameters<typeof db.upsertMailTemplate>[0]);
+      const saved = await db.upsertMailTemplate(mail);
       if (saved?.id && saved.id !== mail.id) {
         set((s) => ({
           mailTemplates: s.mailTemplates.map((x) =>

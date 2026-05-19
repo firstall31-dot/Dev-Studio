@@ -8,6 +8,7 @@ export const conversations = pgTable("conversations", {
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const messages = pgTable("messages", {

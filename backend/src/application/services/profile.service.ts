@@ -1,34 +1,26 @@
-import { db } from "../../infrastructure/database/index.js";
 import { userProfiles } from "../../domain/schema.js";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class ProfileService {
   static async getByUserId(userId: string) {
-    const rows = await db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId));
+    const rows = await uow.userProfiles.findAll(eq(userProfiles.userId, userId));
     return rows[0] ?? null;
   }
 
-  static async upsert(userId: string, data: { displayName?: string; avatarUrl?: string; location?: string }) {
-    const existing = await db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId));
+  static async upsert(
+    userId: string,
+    data: { displayName?: string; avatarUrl?: string; location?: string },
+  ) {
+    const existing = await uow.userProfiles.findAll(eq(userProfiles.userId, userId));
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(userProfiles)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(userProfiles.userId, userId))
-        .returning();
+      // Find the profile ID to perform an ID-based update
+      const profileId = existing[0].id;
+      const r = await uow.userProfiles.update(profileId, data);
       return r;
     } else {
-      const [r] = await db
-        .insert(userProfiles)
-        .values({ userId, ...data })
-        .returning();
+      const r = await uow.userProfiles.create({ userId, ...data });
       return r;
     }
   }

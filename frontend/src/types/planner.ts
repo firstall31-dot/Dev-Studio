@@ -1,8 +1,6 @@
-import { taskPriorityEnum, taskStatusEnum, taskCategoryEnum } from "@shared/schema/planner";
+import type { TaskPriority, TaskStatus, TaskCategory } from "@shared/enums";
 
-export type TaskPriority = (typeof taskPriorityEnum.enumValues)[number];
-export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
-export type TaskCategory = (typeof taskCategoryEnum.enumValues)[number];
+export type { TaskPriority, TaskStatus, TaskCategory };
 
 export interface PlannerTask {
   id: string;

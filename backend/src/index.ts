@@ -8,6 +8,7 @@ import {
   morganLogger,
   compressionMiddleware,
   noCacheMiddleware,
+  globalLimiter,
 } from "./presentation/config/index.js";
 import { registerRoutes } from "./presentation/routes.js";
 import { setupGooglePassport } from "./presentation/controllers/auth.controller.js";
@@ -25,6 +26,7 @@ const app = express();
 // --- Security & HTTP Hardening ---
 app.use(helmetOptions);
 app.use(corsOptions);
+app.use(globalLimiter); // Apply rate limiting
 app.use(morganLogger);
 
 // --- Dev: disable caching ---

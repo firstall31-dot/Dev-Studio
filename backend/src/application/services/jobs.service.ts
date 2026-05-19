@@ -1,4 +1,3 @@
-import { db } from "../../infrastructure/database/index.js";
 import { savedJobs } from "../../domain/schema.js";
 import { eq, and } from "drizzle-orm";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
@@ -6,38 +5,35 @@ import { scrapeIndeedRSS } from "../../infrastructure/lib/scrapers/indeed.js";
 import { scrapeWuzzuf } from "../../infrastructure/lib/scrapers/wuzzuf.js";
 import { scrapeBayt } from "../../infrastructure/lib/scrapers/bayt.js";
 import { scrapeRemoteOKTagged } from "../../infrastructure/lib/scrapers/remoteok.js";
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class JobsService {
   static async getSaved(userId: string) {
-    return await db.select().from(savedJobs).where(eq(savedJobs.userId, userId));
+    return await uow.savedJobs.findAll(eq(savedJobs.userId, userId));
   }
 
   static async saveJob(userId: string, rawData: any) {
     const { id, ...raw } = rawData;
     const data = stripDates(raw);
     const safeId = isUUID(id) ? id : undefined;
-    
+
     if (safeId) {
-      const existing = await db
-        .select()
-        .from(savedJobs)
-        .where(and(eq(savedJobs.id, safeId), eq(savedJobs.userId, userId)));
-        
+      const existing = await uow.savedJobs.findAll(
+        and(eq(savedJobs.id, safeId), eq(savedJobs.userId, userId))
+      );
+
       if (existing.length > 0) {
-        const [r] = await db
-          .update(savedJobs)
-          .set({ ...data, updatedAt: new Date() })
-          .where(eq(savedJobs.id, safeId))
-          .returning();
+        const r = await uow.savedJobs.update(safeId, data);
         return r;
       }
     }
-    
-    const [r] = await db
-      .insert(savedJobs)
-      .values({ ...data, userId, ...(safeId ? { id: safeId } : {}) } as any)
-      .returning();
-      
+
+    const r = await uow.savedJobs.create({
+      ...data,
+      userId,
+      ...(safeId ? { id: safeId } : {}),
+    } as any);
+
     return r;
   }
 
@@ -45,9 +41,10 @@ export class JobsService {
     if (!isUUID(id)) {
       return true;
     }
-    await db
-      .delete(savedJobs)
-      .where(and(eq(savedJobs.id, id), eq(savedJobs.userId, userId)));
+    const job = await uow.savedJobs.findById(id);
+    if (job && job.userId === userId) {
+      await uow.savedJobs.delete(id);
+    }
     return true;
   }
 
@@ -59,9 +56,9 @@ export class JobsService {
         Accept: "application/json",
       },
     });
-    
+
     if (!r.ok) throw new Error(`RemoteOK ${r.status}`);
-    
+
     const data = (await r.json()) as any[];
     return data
       .slice(1)
@@ -69,7 +66,12 @@ export class JobsService {
       .slice(0, 30);
   }
 
-  static async scrapeJobs(query: string, location: string, days: number, sources: string[]) {
+  static async scrapeJobs(
+    query: string,
+    location: string,
+    days: number,
+    sources: string[],
+  ) {
     const results: any[] = [];
     const errors: string[] = [];
     const tasks: Promise<void>[] = [];
@@ -85,7 +87,9 @@ export class JobsService {
     };
 
     if (sources.includes("indeed"))
-      tasks.push(runTask("indeed", () => scrapeIndeedRSS(query, location, days)));
+      tasks.push(
+        runTask("indeed", () => scrapeIndeedRSS(query, location, days)),
+      );
     if (sources.includes("wuzzuf"))
       tasks.push(runTask("wuzzuf", () => scrapeWuzzuf(query, location, days)));
     if (sources.includes("bayt"))
@@ -94,11 +98,11 @@ export class JobsService {
       tasks.push(runTask("remoteok", () => scrapeRemoteOKTagged(query)));
 
     await Promise.allSettled(tasks);
-    
+
     results.sort(
       (a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime(),
     );
-    
+
     return { jobs: results.slice(0, 60), errors };
   }
 }

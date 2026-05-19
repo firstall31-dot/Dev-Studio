@@ -1,7 +1,11 @@
 import { getOpenAI } from "../../infrastructure/lib/openai.js";
 
 export class ChatService {
-  static async createChatCompletion(prompt: string, systemPrompt?: string, config?: { model?: string; temperature?: number; maxTokens?: number }) {
+  static async createChatCompletion(
+    prompt: string,
+    systemPrompt?: string,
+    config?: { model?: string; temperature?: number; maxTokens?: number },
+  ) {
     if (!prompt) {
       throw new Error("prompt is required");
     }

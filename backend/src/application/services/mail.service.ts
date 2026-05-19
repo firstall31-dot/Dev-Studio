@@ -1,11 +1,11 @@
-import { db } from "../../infrastructure/database/index.js";
 import { mailTemplates } from "../../domain/schema.js";
 import { eq, and } from "drizzle-orm";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
 
 export class MailService {
   static async getAll(userId: string) {
-    return await db.select().from(mailTemplates).where(eq(mailTemplates.userId, userId));
+    return await uow.mailTemplates.findAll(eq(mailTemplates.userId, userId));
   }
 
   static async create(userId: string, rawData: any) {
@@ -13,28 +13,20 @@ export class MailService {
     const data = stripDates(raw);
     const safeId = isUUID(id) ? id : undefined;
     const existing = safeId
-      ? await db
-          .select()
-          .from(mailTemplates)
-          .where(and(eq(mailTemplates.id, safeId), eq(mailTemplates.userId, userId)))
+      ? await uow.mailTemplates.findAll(
+          and(eq(mailTemplates.id, safeId), eq(mailTemplates.userId, userId))
+        )
       : [];
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(mailTemplates)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(mailTemplates.id, safeId!))
-        .returning();
+      const r = await uow.mailTemplates.update(safeId!, data);
       return r;
     } else {
-      const [r] = await db
-        .insert(mailTemplates)
-        .values({
-          ...data,
-          userId,
-          ...(safeId ? { id: safeId } : {}),
-        } as any)
-        .returning();
+      const r = await uow.mailTemplates.create({
+        ...data,
+        userId,
+        ...(safeId ? { id: safeId } : {}),
+      } as any);
       return r;
     }
   }
@@ -48,21 +40,18 @@ export class MailService {
       const safeId = isUUID(id) ? id : undefined;
       return { ...data, userId, ...(safeId ? { id: safeId } : {}) } as any;
     });
-    
-    return await db
-      .insert(mailTemplates)
-      .values(values)
-      .onConflictDoNothing()
-      .returning();
+
+    return await uow.mailTemplates.createMany(values);
   }
 
   static async deleteById(userId: string, id: string) {
     if (!isUUID(id)) {
       return true;
     }
-    await db
-      .delete(mailTemplates)
-      .where(and(eq(mailTemplates.id, id), eq(mailTemplates.userId, userId)));
+    const mailTemplate = await uow.mailTemplates.findById(id);
+    if (mailTemplate && mailTemplate.userId === userId) {
+      await uow.mailTemplates.delete(id);
+    }
     return true;
   }
 }

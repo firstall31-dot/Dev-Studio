@@ -45,7 +45,9 @@ export const postAtsCheck = async (req: Request, res: Response) => {
     res.json(result);
   } catch (error) {
     const msg = error instanceof Error ? error.message : "AI analysis failed";
-    res.status(error instanceof Error && msg.includes("required") ? 400 : 500).json({ error: msg });
+    res
+      .status(error instanceof Error && msg.includes("required") ? 400 : 500)
+      .json({ error: msg });
   }
 };
 
@@ -57,7 +59,9 @@ export const postParsePdf = async (req: Request, res: Response) => {
     res.json({ text });
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Failed to parse PDF";
-    res.status(error instanceof Error && msg.includes("required") ? 400 : 500).json({ error: msg });
+    res
+      .status(error instanceof Error && msg.includes("required") ? 400 : 500)
+      .json({ error: msg });
   }
 };
 

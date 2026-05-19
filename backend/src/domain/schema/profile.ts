@@ -5,5 +5,6 @@ export const userProfiles = pgTable("user_profiles", {
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   location: text("location"),
+  deletedAt: timestamp("deleted_at"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

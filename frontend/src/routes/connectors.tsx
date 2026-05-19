@@ -8,6 +8,7 @@ import { ConnectorsSidebar } from "@/components/connectors/connectors-sidebar";
 import { ConnectorEditor } from "@/components/connectors/connector-editor";
 import type { Connector } from "@/types/tools";
 import { CONNECTORS_TABS } from "@/constants";
+import { ConnectorType } from "@shared/enums";
 
 const connectorsSearchSchema = z.object({
   tab: z.string().optional(),
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/connectors")({
 function ConnectorsPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const tab = search.tab || "companies";
+  const tab = (search.tab || "companies") as ConnectorType;
 
   const { connectors, upsertConnector, deleteConnector } = useForge();
   const [activeConnectorId, setActiveConnectorId] = useState<string | null>(null);

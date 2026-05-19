@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Trash2, ExternalLink, Star } from "lucide-react";
-import type { MyService } from "./types";
+import type { MyService, ServiceStatus } from "./types";
 import { SERVICE_STATUSES, SERVICE_PLATFORMS } from "./types";
 import { toast } from "sonner";
 
@@ -191,7 +191,7 @@ export function ServiceEditor({ service, isNew, onSave, onDelete }: Props) {
               <select
                 className={inp}
                 value={form.status ?? "active"}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as ServiceStatus }))}
               >
                 {SERVICE_STATUSES.map((s) => (
                   <option key={s} value={s}>

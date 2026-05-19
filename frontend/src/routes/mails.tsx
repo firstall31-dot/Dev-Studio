@@ -8,6 +8,7 @@ import { MailsSidebar } from "@/components/mails/mails-sidebar";
 import { TemplateEditor } from "@/components/mails/template-editor";
 import type { MailTemplate } from "@/types/tools";
 import { MAIL_TABS } from "@/constants";
+import { MailChannel } from "@shared/enums";
 
 const mailsSearchSchema = z.object({
   tab: z.string().optional(),
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/mails")({
 function MailsPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const tab = search.tab || "cover-letter";
+  const tab = (search.tab || "cover-letter") as MailChannel;
 
   const { mailTemplates, upsertMailTemplate, deleteMailTemplate } = useForge();
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);

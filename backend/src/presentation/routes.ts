@@ -41,15 +41,21 @@ export function registerRoutes(app: Express) {
 
   // --- Legacy Backward Compatibility ---
 
-  app.use("/api/progress", (req: Request, res: Response, next: NextFunction) => {
-    req.url = "/progress" + (req.url === "/" ? "" : req.url);
-    interviewController(req, res, next);
-  });
+  app.use(
+    "/api/progress",
+    (req: Request, res: Response, next: NextFunction) => {
+      req.url = "/progress" + (req.url === "/" ? "" : req.url);
+      interviewController(req, res, next);
+    },
+  );
 
-  app.use("/api/interview-questions", (req: Request, res: Response, next: NextFunction) => {
-    req.url = "/questions" + (req.url === "/" ? "" : req.url);
-    interviewController(req, res, next);
-  });
+  app.use(
+    "/api/interview-questions",
+    (req: Request, res: Response, next: NextFunction) => {
+      req.url = "/questions" + (req.url === "/" ? "" : req.url);
+      interviewController(req, res, next);
+    },
+  );
 
   app.use("/api/social-drafts", socialController);
   app.use("/api/mail-templates", mailController);

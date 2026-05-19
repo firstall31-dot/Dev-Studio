@@ -1,47 +1,26 @@
-import { db } from "../../infrastructure/database/index.js";
+
 import { plannerTasks } from "../../domain/schema.js";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, isNull } from "drizzle-orm";
 import { getOpenAI } from "../../infrastructure/lib/openai.js";
 import { stripDates, isUUID } from "../../presentation/middleware/auth.js"; // In future, move to domain utils
+import { uow } from "../../infrastructure/repositories/drizzle-unit-of-work.js";
+import { PlannerMapper } from "../../domain/mappers/planner.mapper.js";
 
 export class PlannerService {
-  static parseRow(row: any) {
-    if (!row) return row;
-    return {
-      id: row.id,
-      date: row.date,
-      title: row.title,
-      description: row.description || undefined,
-      priority: row.priority || "medium",
-      status: row.status || "todo",
-      category: row.category || "general",
-      order: row.order ?? 0,
-      estimatedMinutes: row.estimatedMinutes ?? undefined,
-      createdAt: new Date(row.createdAt).getTime(),
-      updatedAt: new Date(row.updatedAt).getTime(),
-    };
-  }
-
   static async getAll(userId: string, from?: string, to?: string) {
     let rows;
     if (from && to) {
-      rows = await db
-        .select()
-        .from(plannerTasks)
-        .where(
-          and(
-            eq(plannerTasks.userId, userId),
-            gte(plannerTasks.date, from),
-            lte(plannerTasks.date, to),
-          ),
-        );
+      rows = await uow.plannerTasks.findAll(
+        and(
+          eq(plannerTasks.userId, userId),
+          gte(plannerTasks.date, from),
+          lte(plannerTasks.date, to)
+        )
+      );
     } else {
-      rows = await db
-        .select()
-        .from(plannerTasks)
-        .where(eq(plannerTasks.userId, userId));
+      rows = await uow.plannerTasks.findAll(eq(plannerTasks.userId, userId));
     }
-    return rows.map(PlannerService.parseRow);
+    return rows.map(PlannerMapper.toDomain);
   }
 
   static async create(userId: string, rawData: any) {
@@ -62,37 +41,30 @@ export class PlannerService {
 
     const safeId = isUUID(id) ? id : undefined;
     const existing = safeId
-      ? await db
-          .select()
-          .from(plannerTasks)
-          .where(and(eq(plannerTasks.id, safeId), eq(plannerTasks.userId, userId)))
+      ? await uow.plannerTasks.findAll(
+          and(eq(plannerTasks.id, safeId), eq(plannerTasks.userId, userId))
+        )
       : [];
 
     if (existing.length > 0) {
-      const [r] = await db
-        .update(plannerTasks)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(plannerTasks.id, safeId!))
-        .returning();
-      return PlannerService.parseRow(r);
+      const r = await uow.plannerTasks.update(safeId!, data);
+      return PlannerMapper.toDomain(r);
     } else {
-      const [r] = await db
-        .insert(plannerTasks)
-        .values({
-          ...data,
-          userId,
-          ...(safeId ? { id: safeId } : {}),
-        } as any)
-        .returning();
-      return PlannerService.parseRow(r);
+      const r = await uow.plannerTasks.create({
+        ...data,
+        userId,
+        ...(safeId ? { id: safeId } : {}),
+      } as any);
+      return PlannerMapper.toDomain(r);
     }
   }
 
   static async deleteById(userId: string, id: string) {
     if (!isUUID(id)) return true;
-    await db
-      .delete(plannerTasks)
-      .where(and(eq(plannerTasks.id, id), eq(plannerTasks.userId, userId)));
+    const task = await uow.plannerTasks.findById(id);
+    if (task && task.userId === userId) {
+      await uow.plannerTasks.delete(id);
+    }
     return true;
   }
 
@@ -139,15 +111,13 @@ Return ONLY a valid JSON object with this exact structure:
     if (clear) {
       const from = `${ym}-01`;
       const to = `${ym}-${String(daysInMonth).padStart(2, "0")}`;
-      await db
-        .delete(plannerTasks)
-        .where(
-          and(
-            eq(plannerTasks.userId, userId),
-            gte(plannerTasks.date, from),
-            lte(plannerTasks.date, to),
-          ),
-        );
+      await uow.plannerTasks.deleteMany(
+        and(
+          eq(plannerTasks.userId, userId),
+          gte(plannerTasks.date, from),
+          lte(plannerTasks.date, to)
+        )
+      );
     }
 
     type Seed = {
@@ -476,10 +446,7 @@ Return ONLY a valid JSON object with this exact structure:
     }
 
     if (rows.length > 0) {
-      await db
-        .insert(plannerTasks)
-        .values(rows as any[])
-        .onConflictDoNothing();
+      await uow.plannerTasks.createMany(rows as any[]);
     }
 
     return { count: rows.length };

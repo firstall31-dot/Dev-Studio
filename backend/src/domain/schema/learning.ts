@@ -10,20 +10,13 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-export const questionDifficultyEnum = pgEnum("question_difficulty", [
-  "junior",
-  "mid",
-  "senior",
-]);
-export const questionAreaEnum = pgEnum("question_area", [
-  "frontend",
-  "backend",
-  "devops",
-  "testing",
-  "database",
-  "softskills",
-  "general",
-]);
+import { QUESTION_DIFFICULTIES, QUESTION_AREAS } from "../enums.js";
+
+export const questionDifficultyEnum = pgEnum(
+  "question_difficulty",
+  QUESTION_DIFFICULTIES,
+);
+export const questionAreaEnum = pgEnum("question_area", QUESTION_AREAS);
 
 export const interviewQuestions = pgTable(
   "interview_questions",
@@ -36,10 +29,12 @@ export const interviewQuestions = pgTable(
     area: questionAreaEnum("area").notNull(),
     tags: text("tags").array().default([]),
     category: text("category"),
+    slug: text("slug").default(""),
     favorite: boolean("favorite").default(false),
     answerDepths: jsonb("answer_depths").default([]),
     isGlobal: boolean("is_global").default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
   (t) => [
     index("interview_questions_user_id_idx").on(t.userId),
