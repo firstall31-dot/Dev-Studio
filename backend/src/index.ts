@@ -79,9 +79,14 @@ async function startServer() {
     logger.error("Database seeding failed on startup", { err });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    logger.info(`Dev Studio running on port ${PORT}`, { port: PORT, env: process.env.NODE_ENV ?? "development" });
-  });
+  // Only start the listener if we're not running on Vercel
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      logger.info(`Dev Studio running on port ${PORT}`, { port: PORT, env: process.env.NODE_ENV ?? "development" });
+    });
+  }
 }
 
 startServer();
+
+export default app;
