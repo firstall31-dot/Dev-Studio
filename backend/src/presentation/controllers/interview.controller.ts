@@ -1,107 +1,81 @@
 import { Router, Request, Response } from "express";
-import { db } from "../../infrastructure/database/index.js";
-import { interviewQuestions, userProgress } from "../../domain/schema.js";
-import { eq, and, or } from "drizzle-orm";
-import { requireUser, stripDates, isUUID } from "../middleware/auth.js";
+import { requireUser } from "../middleware/auth.js";
+import { InterviewService } from "../../application/services/interview.service.js";
 
 export const getQuestions = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  res.json(
-    await db
-      .select()
-      .from(interviewQuestions)
-      .where(or(eq(interviewQuestions.isGlobal, true), eq(interviewQuestions.userId, uid))),
-  );
+  try {
+    const data = await InterviewService.getQuestions(uid);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch interview questions" });
+  }
 };
 
 export const postQuestions = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const { id, ...raw } = req.body;
-  const data = stripDates(raw);
-  const safeId = isUUID(id) ? id : undefined;
-  const existing = safeId
-    ? await db.select().from(interviewQuestions).where(eq(interviewQuestions.id, safeId))
-    : [];
-
-  if (existing.length > 0 && existing[0].userId === uid) {
-    const [r] = await db
-      .update(interviewQuestions)
-      .set(data)
-      .where(eq(interviewQuestions.id, safeId!))
-      .returning();
-    res.json(r);
-  } else {
-    const [r] = await db
-      .insert(interviewQuestions)
-      .values({ ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any)
-      .returning();
-    res.json(r);
+  try {
+    const result = await InterviewService.createQuestion(uid, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create interview question" });
   }
 };
 
 export const postQuestionsBulk = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const items = req.body as any[];
-  if (!items.length) {
-    res.json([]);
-    return;
+  try {
+    const items = Array.isArray(req.body) ? req.body : [];
+    const result = await InterviewService.createQuestionsBulk(uid, items);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create bulk interview questions" });
   }
-  const values = items.map(({ id, ...raw }) => {
-    const data = stripDates(raw);
-    const safeId = isUUID(id) ? id : undefined;
-    return { ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any;
-  });
-  const result = await db
-    .insert(interviewQuestions)
-    .values(values)
-    .onConflictDoNothing()
-    .returning();
-  res.json(result);
 };
 
 export const deleteQuestionsById = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  if (!isUUID(req.params.id)) {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await InterviewService.deleteQuestionById(uid, id);
     res.json({ ok: true });
-    return;
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete interview question" });
   }
-  await db
-    .delete(interviewQuestions)
-    .where(and(eq(interviewQuestions.id, req.params.id), eq(interviewQuestions.userId, uid)));
-  res.json({ ok: true });
 };
 
 export const getProgress = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  res.json(await db.select().from(userProgress).where(eq(userProgress.userId, uid)));
+  try {
+    const data = await InterviewService.getProgress(uid);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch progress" });
+  }
 };
 
 export const postProgressToggle = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
   const { itemId, areaId, completed } = req.body;
-  const existing = await db
-    .select()
-    .from(userProgress)
-    .where(and(eq(userProgress.userId, uid), eq(userProgress.itemId, itemId)));
-
-  if (existing.length > 0) {
-    const [r] = await db
-      .update(userProgress)
-      .set({ completed, updatedAt: new Date() })
-      .where(and(eq(userProgress.userId, uid), eq(userProgress.itemId, itemId)))
-      .returning();
-    res.json(r);
-  } else {
-    const [r] = await db
-      .insert(userProgress)
-      .values({ userId: uid, itemId, areaId, completed })
-      .returning();
-    res.json(r);
+  try {
+    const result = await InterviewService.toggleProgress(uid, itemId, areaId, completed);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to toggle progress" });
   }
 };
+
+const router = Router();
+router.get("/questions", getQuestions);
+router.post("/questions", postQuestions);
+router.post("/questions/bulk", postQuestionsBulk);
+router.delete("/questions/:id", deleteQuestionsById);
+router.get("/progress", getProgress);
+router.post("/progress/toggle", postProgressToggle);
+export default router;

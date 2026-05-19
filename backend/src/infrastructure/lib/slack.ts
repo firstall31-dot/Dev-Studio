@@ -6,11 +6,17 @@ interface SlackMessage {
     type: string;
     text?: { type: string; text: string };
     fields?: Array<{ type: string; text: string }>;
-    elements?: Array<{ type: string; text: { type: string; text: string }; url?: string }>;
+    elements?: Array<{
+      type: string;
+      text: { type: string; text: string };
+      url?: string;
+    }>;
   }>;
 }
 
-export async function sendSlackNotification(message: SlackMessage): Promise<void> {
+export async function sendSlackNotification(
+  message: SlackMessage,
+): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
@@ -67,7 +73,9 @@ export async function notifyDeployment(
             type: "mrkdwn",
             text: `*Status:*\n${status}`,
           },
-          ...(commit ? [{ type: "mrkdwn", text: `*Commit:*\n\`${commit.slice(0, 7)}\`` }] : []),
+          ...(commit
+            ? [{ type: "mrkdwn", text: `*Commit:*\n\`${commit.slice(0, 7)}\`` }]
+            : []),
           ...(author ? [{ type: "mrkdwn", text: `*Author:*\n${author}` }] : []),
         ],
       },
@@ -77,7 +85,10 @@ export async function notifyDeployment(
   await sendSlackNotification(message);
 }
 
-export async function notifyError(error: Error, context?: Record<string, unknown>): Promise<void> {
+export async function notifyError(
+  error: Error,
+  context?: Record<string, unknown>,
+): Promise<void> {
   const message: SlackMessage = {
     text: "❌ Error occurred",
     blocks: [
@@ -142,7 +153,9 @@ export async function notifyBuild(
             type: "mrkdwn",
             text: `*Status:*\n${status}`,
           },
-          ...(message ? [{ type: "mrkdwn", text: `*Message:*\n${message}` }] : []),
+          ...(message
+            ? [{ type: "mrkdwn", text: `*Message:*\n${message}` }]
+            : []),
         ],
       },
     ],
@@ -151,7 +164,11 @@ export async function notifyBuild(
   await sendSlackNotification(slackMessage);
 }
 
-export function verifySlackSignature(body: string, timestamp: string, signature: string): boolean {
+export function verifySlackSignature(
+  body: string,
+  timestamp: string,
+  signature: string,
+): boolean {
   const signingSecret = process.env.SLACK_SIGNING_SECRET;
 
   if (!signingSecret) {
@@ -166,8 +183,14 @@ export function verifySlackSignature(body: string, timestamp: string, signature:
   }
 
   const baseString = `v0:${timestamp}:${body}`;
-  const hmac = crypto.createHmac("sha256", signingSecret).update(baseString).digest("hex");
+  const hmac = crypto
+    .createHmac("sha256", signingSecret)
+    .update(baseString)
+    .digest("hex");
   const computedSignature = `v0=${hmac}`;
 
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature));
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(computedSignature),
+  );
 }

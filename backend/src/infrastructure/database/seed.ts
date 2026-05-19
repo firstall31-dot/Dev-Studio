@@ -5,7 +5,10 @@ import { seedInterviewExtra } from "../../../../frontend/src/data/tech/interview
 import { DEFAULT_QUESTIONS } from "../../../../frontend/src/data/soft/behavioral.js";
 
 async function seedGlobalInterviewQuestions() {
-  const existing = await db.select({ id: interviewQuestions.id }).from(interviewQuestions).limit(1);
+  const existing = await db
+    .select({ id: interviewQuestions.id })
+    .from(interviewQuestions)
+    .limit(1);
   if (existing.length > 0) {
     console.log("Interview questions already seeded — skipping.");
     return;

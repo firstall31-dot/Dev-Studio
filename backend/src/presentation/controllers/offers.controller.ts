@@ -1,52 +1,43 @@
 import { Router, Request, Response } from "express";
-import { db } from "../../infrastructure/database/index.js";
-import { freelanceOffers } from "../../domain/schema.js";
-import { eq, and } from "drizzle-orm";
-import { requireUser, stripDates, isUUID } from "../middleware/auth.js";
+import { requireUser } from "../middleware/auth.js";
+import { OffersService } from "../../application/services/offers.service.js";
 
 export const getAll = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  res.json(await db.select().from(freelanceOffers).where(eq(freelanceOffers.userId, uid)));
+  try {
+    const offers = await OffersService.getAll(uid);
+    res.json(offers);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch offers" });
+  }
 };
 
 export const create = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const { id, ...raw } = req.body;
-  const data = stripDates(raw);
-  const safeId = isUUID(id) ? id : undefined;
-  if (safeId) {
-    const existing = await db
-      .select()
-      .from(freelanceOffers)
-      .where(and(eq(freelanceOffers.id, safeId), eq(freelanceOffers.userId, uid)));
-    if (existing.length > 0) {
-      const [r] = await db
-        .update(freelanceOffers)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(freelanceOffers.id, safeId))
-        .returning();
-      res.json(r);
-      return;
-    }
+  try {
+    const result = await OffersService.create(uid, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create offer" });
   }
-  const [r] = await db
-    .insert(freelanceOffers)
-    .values({ ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any)
-    .returning();
-  res.json(r);
 };
 
 export const deleteById = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  if (!isUUID(req.params.id)) {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await OffersService.deleteById(uid, id);
     res.json({ ok: true });
-    return;
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete offer" });
   }
-  await db
-    .delete(freelanceOffers)
-    .where(and(eq(freelanceOffers.id, req.params.id), eq(freelanceOffers.userId, uid)));
-  res.json({ ok: true });
 };
+
+const router = Router();
+router.get("/", getAll);
+router.post("/", create);
+router.delete("/:id", deleteById);
+export default router;

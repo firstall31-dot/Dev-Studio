@@ -1,70 +1,56 @@
 import { Router, Request, Response } from "express";
-import { db } from "../../infrastructure/database/index.js";
-import { mailTemplates } from "../../domain/schema.js";
-import { eq, and } from "drizzle-orm";
-import { requireUser, stripDates, isUUID } from "../middleware/auth.js";
+import { requireUser } from "../middleware/auth.js";
+import { MailService } from "../../application/services/mail.service.js";
 
 export const getAll = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  res.json(await db.select().from(mailTemplates).where(eq(mailTemplates.userId, uid)));
+  try {
+    const data = await MailService.getAll(uid);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch mail templates" });
+  }
 };
 
 export const create = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const { id, ...raw } = req.body;
-  const data = stripDates(raw);
-  const safeId = isUUID(id) ? id : undefined;
-  const existing = safeId
-    ? await db
-        .select()
-        .from(mailTemplates)
-        .where(and(eq(mailTemplates.id, safeId), eq(mailTemplates.userId, uid)))
-    : [];
-
-  if (existing.length > 0) {
-    const [r] = await db
-      .update(mailTemplates)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(mailTemplates.id, safeId!))
-      .returning();
-    res.json(r);
-  } else {
-    const [r] = await db
-      .insert(mailTemplates)
-      .values({ ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any)
-      .returning();
-    res.json(r);
+  try {
+    const result = await MailService.create(uid, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create mail template" });
   }
 };
 
 export const createBulk = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const items = req.body as any[];
-  if (!items.length) {
-    res.json([]);
-    return;
+  try {
+    const items = Array.isArray(req.body) ? req.body : [];
+    const result = await MailService.createBulk(uid, items);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create bulk mail templates" });
   }
-  const values = items.map(({ id, ...raw }) => {
-    const data = stripDates(raw);
-    const safeId = isUUID(id) ? id : undefined;
-    return { ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any;
-  });
-  const result = await db.insert(mailTemplates).values(values).onConflictDoNothing().returning();
-  res.json(result);
 };
 
 export const deleteById = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  if (!isUUID(req.params.id)) {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await MailService.deleteById(uid, id);
     res.json({ ok: true });
-    return;
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete mail template" });
   }
-  await db
-    .delete(mailTemplates)
-    .where(and(eq(mailTemplates.id, req.params.id), eq(mailTemplates.userId, uid)));
-  res.json({ ok: true });
 };
+
+const router = Router();
+router.get("/", getAll);
+router.post("/", create);
+router.post("/bulk", createBulk);
+router.delete("/:id", deleteById);
+export default router;

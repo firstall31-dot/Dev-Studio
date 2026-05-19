@@ -1,34 +1,31 @@
 import { Router, Request, Response } from "express";
-import { db } from "../../infrastructure/database/index.js";
-import { userProfiles } from "../../domain/schema.js";
-import { eq } from "drizzle-orm";
 import { requireUser } from "../middleware/auth.js";
+import { ProfileService } from "../../application/services/profile.service.js";
 
 export const getAll = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const rows = await db.select().from(userProfiles).where(eq(userProfiles.userId, uid));
-  res.json(rows[0] ?? null);
+  try {
+    const profile = await ProfileService.getByUserId(uid);
+    res.json(profile);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
 };
 
 export const create = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
   const { displayName, avatarUrl, location } = req.body;
-  const existing = await db.select().from(userProfiles).where(eq(userProfiles.userId, uid));
-
-  if (existing.length > 0) {
-    const [r] = await db
-      .update(userProfiles)
-      .set({ displayName, avatarUrl, location, updatedAt: new Date() })
-      .where(eq(userProfiles.userId, uid))
-      .returning();
-    res.json(r);
-  } else {
-    const [r] = await db
-      .insert(userProfiles)
-      .values({ userId: uid, displayName, avatarUrl, location })
-      .returning();
-    res.json(r);
+  try {
+    const result = await ProfileService.upsert(uid, { displayName, avatarUrl, location });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update profile" });
   }
 };
+
+const router = Router();
+router.get("/", getAll);
+router.post("/", create);
+export default router;

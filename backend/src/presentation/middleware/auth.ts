@@ -7,7 +7,9 @@ export function getUserId(req: Request): string | null {
   const token = req.cookies?.[COOKIE_NAME];
   if (token) {
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET!) as { sub: string };
+      const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
+        sub: string;
+      };
       return payload.sub ?? null;
     } catch {
       return null;
@@ -25,7 +27,9 @@ export function requireUser(req: Request, res: Response): string | null {
   return id;
 }
 
-export function stripDates(data: Record<string, unknown>): Record<string, unknown> {
+export function stripDates(
+  data: Record<string, unknown>,
+): Record<string, unknown> {
   const { createdAt, updatedAt, created_at, updated_at, ...rest } = data;
   void createdAt;
   void updatedAt;

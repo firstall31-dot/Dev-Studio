@@ -31,26 +31,20 @@ const options: swaggerJSDoc.Options = {
       },
     },
   },
-  // Paths to files containing OpenAPI annotations
   apis: [
-    "./src/presentation/swagger-docs.js",
-    "./src/presentation/swagger-docs.ts",
-    "./src/presentation/routes/api/*.js",
-    "./src/presentation/routes/api/*.ts",
+    "./src/presentation/docs/swagger-docs.js",
+    "./src/presentation/docs/swagger-docs.ts",
+    "./src/presentation/controllers/*.js",
+    "./src/presentation/controllers/*.ts",
   ],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
 
 export function setupSwagger(app: Express) {
-  // Serve Swagger UI documentation
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-  // Redirect common alternative documentation endpoints for a smoother DX
   app.get("/swagger", (_req, res) => res.redirect("/api-docs"));
   app.get("/docs", (_req, res) => res.redirect("/api-docs"));
-
-  // Provide raw swagger.json endpoint
   app.get("/swagger.json", (_req, res) => {
     res.setHeader("Content-Type", "application/json");
     res.send(swaggerSpec);

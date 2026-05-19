@@ -10,7 +10,11 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-export const questionDifficultyEnum = pgEnum("question_difficulty", ["junior", "mid", "senior"]);
+export const questionDifficultyEnum = pgEnum("question_difficulty", [
+  "junior",
+  "mid",
+  "senior",
+]);
 export const questionAreaEnum = pgEnum("question_area", [
   "frontend",
   "backend",

@@ -1,4 +1,8 @@
-export async function scrapeBayt(query: string, location: string, days: number): Promise<any[]> {
+export async function scrapeBayt(
+  query: string,
+  location: string,
+  days: number,
+): Promise<any[]> {
   const slug = query
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -10,7 +14,8 @@ export async function scrapeBayt(query: string, location: string, days: number):
   ).toString();
   const r = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       Accept: "text/html,application/xhtml+xml",
       "Accept-Language": "en-US,en;q=0.9",
     },
@@ -26,7 +31,9 @@ export async function scrapeBayt(query: string, location: string, days: number):
     try {
       const obj = JSON.parse(m[1]);
       if (obj["@type"] === "JobPosting" && obj.title) {
-        const posted = obj.datePosted ? new Date(obj.datePosted).getTime() : Date.now();
+        const posted = obj.datePosted
+          ? new Date(obj.datePosted).getTime()
+          : Date.now();
         if (posted >= cutoff) {
           jobs.push({
             id: `bayt_${Buffer.from(obj.url ?? obj.title)
@@ -36,7 +43,10 @@ export async function scrapeBayt(query: string, location: string, days: number):
             title: obj.title,
             company: obj.hiringOrganization?.name ?? "",
             location:
-              [obj.jobLocation?.address?.addressLocality, obj.jobLocation?.address?.addressCountry]
+              [
+                obj.jobLocation?.address?.addressLocality,
+                obj.jobLocation?.address?.addressCountry,
+              ]
                 .filter(Boolean)
                 .join(", ") ||
               location ||

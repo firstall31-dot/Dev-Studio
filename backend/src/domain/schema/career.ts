@@ -1,4 +1,12 @@
-import { pgTable, text, uuid, boolean, integer, timestamp, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  uuid,
+  boolean,
+  integer,
+  timestamp,
+  index,
+} from "drizzle-orm/pg-core";
 
 export const savedJobs = pgTable(
   "saved_jobs",

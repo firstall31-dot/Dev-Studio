@@ -33,7 +33,9 @@ export async function scrapeIndeedRSS(
     const pubDate = extractXmlField(block, "pubDate");
     const guid = extractXmlField(block, "guid") || link;
     const desc = extractXmlField(block, "description");
-    const locM = desc.replace(/<[^>]+>/g, " ").match(/([A-Za-z ]+,\s*[A-Z]{2}(?:\s+\d{5})?)/);
+    const locM = desc
+      .replace(/<[^>]+>/g, " ")
+      .match(/([A-Za-z ]+,\s*[A-Z]{2}(?:\s+\d{5})?)/);
     if (title && link) {
       jobs.push({
         id: `indeed_${Buffer.from(guid).toString("base64").replace(/\W/g, "").slice(0, 20)}`,
@@ -42,7 +44,9 @@ export async function scrapeIndeedRSS(
         source: "indeed",
         location: locM?.[1]?.trim() || location || "Not specified",
         url: link,
-        postedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+        postedAt: pubDate
+          ? new Date(pubDate).toISOString()
+          : new Date().toISOString(),
         tags: [],
       });
     }

@@ -57,27 +57,39 @@ describe("Auth Controller", () => {
       req.body = { email: "" };
       await register(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Email and password are required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Email and password are required",
+      });
     });
 
     it("should return 400 if password is too short", async () => {
       req.body = { email: "test@example.com", password: "123" };
       await register(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Password must be at least 6 characters" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Password must be at least 6 characters",
+      });
     });
 
     it("should return 409 if user already exists", async () => {
       req.body = { email: "existing@example.com", password: "password123" };
-      dbMock.where.mockResolvedValueOnce([{ id: "1", email: "existing@example.com" }]);
+      dbMock.where.mockResolvedValueOnce([
+        { id: "1", email: "existing@example.com" },
+      ]);
 
       await register(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(409);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "An account with this email already exists" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "An account with this email already exists",
+      });
     });
 
     it("should successfully register a new user", async () => {
-      req.body = { email: "new@example.com", password: "password123", displayName: "New User" };
+      req.body = {
+        email: "new@example.com",
+        password: "password123",
+        displayName: "New User",
+      };
       dbMock.where.mockResolvedValueOnce([]); // No existing user
       dbMock.returning.mockResolvedValueOnce([
         {
@@ -105,7 +117,9 @@ describe("Auth Controller", () => {
       req.body = { email: "" };
       await login(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Email and password are required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Email and password are required",
+      });
     });
 
     it("should return 401 if user is not found", async () => {
@@ -114,7 +128,9 @@ describe("Auth Controller", () => {
 
       await login(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(401);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid email or password" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid email or password",
+      });
     });
 
     it("should return 401 if password is invalid", async () => {
@@ -126,14 +142,21 @@ describe("Auth Controller", () => {
 
       await login(req as Request, res as Response);
       expect(statusMock).toHaveBeenCalledWith(401);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid email or password" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid email or password",
+      });
     });
 
     it("should return 403 if email is not verified", async () => {
       req.body = { email: "unverified@example.com", password: "password123" };
       const hash = await bcrypt.hash("password123", 12);
       dbMock.where.mockResolvedValueOnce([
-        { id: "1", email: "unverified@example.com", passwordHash: hash, isVerified: false },
+        {
+          id: "1",
+          email: "unverified@example.com",
+          passwordHash: hash,
+          isVerified: false,
+        },
       ]);
       dbMock.where.mockResolvedValueOnce([{}]); // For the update query where
 
@@ -161,7 +184,11 @@ describe("Auth Controller", () => {
       ]);
 
       await login(req as Request, res as Response);
-      expect(cookieMock).toHaveBeenCalledWith("ds_token", expect.any(String), expect.any(Object));
+      expect(cookieMock).toHaveBeenCalledWith(
+        "ds_token",
+        expect.any(String),
+        expect.any(Object),
+      );
       expect(jsonMock).toHaveBeenCalledWith({
         user: {
           id: "1",

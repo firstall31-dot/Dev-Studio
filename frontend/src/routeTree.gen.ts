@@ -8,330 +8,330 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as ToolsRouteImport } from "./routes/tools";
-import { Route as TechSkillsRouteImport } from "./routes/tech-skills";
-import { Route as SoftSkillsRouteImport } from "./routes/soft-skills";
-import { Route as SocialRouteImport } from "./routes/social";
-import { Route as SitemapDotxmlRouteImport } from "./routes/sitemap[.]xml";
-import { Route as ProfileRouteImport } from "./routes/profile";
-import { Route as PlannerRouteImport } from "./routes/planner";
-import { Route as MailsRouteImport } from "./routes/mails";
-import { Route as JobsRouteImport } from "./routes/jobs";
-import { Route as InterviewRouteImport } from "./routes/interview";
-import { Route as CvRouteImport } from "./routes/cv";
-import { Route as ConnectorsRouteImport } from "./routes/connectors";
-import { Route as AuthRouteImport } from "./routes/auth";
-import { Route as ActivitiesRouteImport } from "./routes/activities";
-import { Route as IndexRouteImport } from "./routes/index";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as TechSkillsRouteImport } from './routes/tech-skills'
+import { Route as SoftSkillsRouteImport } from './routes/soft-skills'
+import { Route as SocialRouteImport } from './routes/social'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PlannerRouteImport } from './routes/planner'
+import { Route as MailsRouteImport } from './routes/mails'
+import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as InterviewRouteImport } from './routes/interview'
+import { Route as CvRouteImport } from './routes/cv'
+import { Route as ConnectorsRouteImport } from './routes/connectors'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ActivitiesRouteImport } from './routes/activities'
+import { Route as IndexRouteImport } from './routes/index'
 
 const ToolsRoute = ToolsRouteImport.update({
-  id: "/tools",
-  path: "/tools",
+  id: '/tools',
+  path: '/tools',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TechSkillsRoute = TechSkillsRouteImport.update({
-  id: "/tech-skills",
-  path: "/tech-skills",
+  id: '/tech-skills',
+  path: '/tech-skills',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SoftSkillsRoute = SoftSkillsRouteImport.update({
-  id: "/soft-skills",
-  path: "/soft-skills",
+  id: '/soft-skills',
+  path: '/soft-skills',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SocialRoute = SocialRouteImport.update({
-  id: "/social",
-  path: "/social",
+  id: '/social',
+  path: '/social',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: "/sitemap.xml",
-  path: "/sitemap.xml",
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
-  id: "/profile",
-  path: "/profile",
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const PlannerRoute = PlannerRouteImport.update({
-  id: "/planner",
-  path: "/planner",
+  id: '/planner',
+  path: '/planner',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const MailsRoute = MailsRouteImport.update({
-  id: "/mails",
-  path: "/mails",
+  id: '/mails',
+  path: '/mails',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const JobsRoute = JobsRouteImport.update({
-  id: "/jobs",
-  path: "/jobs",
+  id: '/jobs',
+  path: '/jobs',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InterviewRoute = InterviewRouteImport.update({
-  id: "/interview",
-  path: "/interview",
+  id: '/interview',
+  path: '/interview',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CvRoute = CvRouteImport.update({
-  id: "/cv",
-  path: "/cv",
+  id: '/cv',
+  path: '/cv',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ConnectorsRoute = ConnectorsRouteImport.update({
-  id: "/connectors",
-  path: "/connectors",
+  id: '/connectors',
+  path: '/connectors',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthRoute = AuthRouteImport.update({
-  id: "/auth",
-  path: "/auth",
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ActivitiesRoute = ActivitiesRouteImport.update({
-  id: "/activities",
-  path: "/activities",
+  id: '/activities',
+  path: '/activities',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/activities": typeof ActivitiesRoute;
-  "/auth": typeof AuthRoute;
-  "/connectors": typeof ConnectorsRoute;
-  "/cv": typeof CvRoute;
-  "/interview": typeof InterviewRoute;
-  "/jobs": typeof JobsRoute;
-  "/mails": typeof MailsRoute;
-  "/planner": typeof PlannerRoute;
-  "/profile": typeof ProfileRoute;
-  "/sitemap.xml": typeof SitemapDotxmlRoute;
-  "/social": typeof SocialRoute;
-  "/soft-skills": typeof SoftSkillsRoute;
-  "/tech-skills": typeof TechSkillsRoute;
-  "/tools": typeof ToolsRoute;
+  '/': typeof IndexRoute
+  '/activities': typeof ActivitiesRoute
+  '/auth': typeof AuthRoute
+  '/connectors': typeof ConnectorsRoute
+  '/cv': typeof CvRoute
+  '/interview': typeof InterviewRoute
+  '/jobs': typeof JobsRoute
+  '/mails': typeof MailsRoute
+  '/planner': typeof PlannerRoute
+  '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/social': typeof SocialRoute
+  '/soft-skills': typeof SoftSkillsRoute
+  '/tech-skills': typeof TechSkillsRoute
+  '/tools': typeof ToolsRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/activities": typeof ActivitiesRoute;
-  "/auth": typeof AuthRoute;
-  "/connectors": typeof ConnectorsRoute;
-  "/cv": typeof CvRoute;
-  "/interview": typeof InterviewRoute;
-  "/jobs": typeof JobsRoute;
-  "/mails": typeof MailsRoute;
-  "/planner": typeof PlannerRoute;
-  "/profile": typeof ProfileRoute;
-  "/sitemap.xml": typeof SitemapDotxmlRoute;
-  "/social": typeof SocialRoute;
-  "/soft-skills": typeof SoftSkillsRoute;
-  "/tech-skills": typeof TechSkillsRoute;
-  "/tools": typeof ToolsRoute;
+  '/': typeof IndexRoute
+  '/activities': typeof ActivitiesRoute
+  '/auth': typeof AuthRoute
+  '/connectors': typeof ConnectorsRoute
+  '/cv': typeof CvRoute
+  '/interview': typeof InterviewRoute
+  '/jobs': typeof JobsRoute
+  '/mails': typeof MailsRoute
+  '/planner': typeof PlannerRoute
+  '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/social': typeof SocialRoute
+  '/soft-skills': typeof SoftSkillsRoute
+  '/tech-skills': typeof TechSkillsRoute
+  '/tools': typeof ToolsRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/activities": typeof ActivitiesRoute;
-  "/auth": typeof AuthRoute;
-  "/connectors": typeof ConnectorsRoute;
-  "/cv": typeof CvRoute;
-  "/interview": typeof InterviewRoute;
-  "/jobs": typeof JobsRoute;
-  "/mails": typeof MailsRoute;
-  "/planner": typeof PlannerRoute;
-  "/profile": typeof ProfileRoute;
-  "/sitemap.xml": typeof SitemapDotxmlRoute;
-  "/social": typeof SocialRoute;
-  "/soft-skills": typeof SoftSkillsRoute;
-  "/tech-skills": typeof TechSkillsRoute;
-  "/tools": typeof ToolsRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/activities': typeof ActivitiesRoute
+  '/auth': typeof AuthRoute
+  '/connectors': typeof ConnectorsRoute
+  '/cv': typeof CvRoute
+  '/interview': typeof InterviewRoute
+  '/jobs': typeof JobsRoute
+  '/mails': typeof MailsRoute
+  '/planner': typeof PlannerRoute
+  '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/social': typeof SocialRoute
+  '/soft-skills': typeof SoftSkillsRoute
+  '/tech-skills': typeof TechSkillsRoute
+  '/tools': typeof ToolsRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/activities"
-    | "/auth"
-    | "/connectors"
-    | "/cv"
-    | "/interview"
-    | "/jobs"
-    | "/mails"
-    | "/planner"
-    | "/profile"
-    | "/sitemap.xml"
-    | "/social"
-    | "/soft-skills"
-    | "/tech-skills"
-    | "/tools";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/activities'
+    | '/auth'
+    | '/connectors'
+    | '/cv'
+    | '/interview'
+    | '/jobs'
+    | '/mails'
+    | '/planner'
+    | '/profile'
+    | '/sitemap.xml'
+    | '/social'
+    | '/soft-skills'
+    | '/tech-skills'
+    | '/tools'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/activities"
-    | "/auth"
-    | "/connectors"
-    | "/cv"
-    | "/interview"
-    | "/jobs"
-    | "/mails"
-    | "/planner"
-    | "/profile"
-    | "/sitemap.xml"
-    | "/social"
-    | "/soft-skills"
-    | "/tech-skills"
-    | "/tools";
+    | '/'
+    | '/activities'
+    | '/auth'
+    | '/connectors'
+    | '/cv'
+    | '/interview'
+    | '/jobs'
+    | '/mails'
+    | '/planner'
+    | '/profile'
+    | '/sitemap.xml'
+    | '/social'
+    | '/soft-skills'
+    | '/tech-skills'
+    | '/tools'
   id:
-    | "__root__"
-    | "/"
-    | "/activities"
-    | "/auth"
-    | "/connectors"
-    | "/cv"
-    | "/interview"
-    | "/jobs"
-    | "/mails"
-    | "/planner"
-    | "/profile"
-    | "/sitemap.xml"
-    | "/social"
-    | "/soft-skills"
-    | "/tech-skills"
-    | "/tools";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/activities'
+    | '/auth'
+    | '/connectors'
+    | '/cv'
+    | '/interview'
+    | '/jobs'
+    | '/mails'
+    | '/planner'
+    | '/profile'
+    | '/sitemap.xml'
+    | '/social'
+    | '/soft-skills'
+    | '/tech-skills'
+    | '/tools'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  ActivitiesRoute: typeof ActivitiesRoute;
-  AuthRoute: typeof AuthRoute;
-  ConnectorsRoute: typeof ConnectorsRoute;
-  CvRoute: typeof CvRoute;
-  InterviewRoute: typeof InterviewRoute;
-  JobsRoute: typeof JobsRoute;
-  MailsRoute: typeof MailsRoute;
-  PlannerRoute: typeof PlannerRoute;
-  ProfileRoute: typeof ProfileRoute;
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute;
-  SocialRoute: typeof SocialRoute;
-  SoftSkillsRoute: typeof SoftSkillsRoute;
-  TechSkillsRoute: typeof TechSkillsRoute;
-  ToolsRoute: typeof ToolsRoute;
+  IndexRoute: typeof IndexRoute
+  ActivitiesRoute: typeof ActivitiesRoute
+  AuthRoute: typeof AuthRoute
+  ConnectorsRoute: typeof ConnectorsRoute
+  CvRoute: typeof CvRoute
+  InterviewRoute: typeof InterviewRoute
+  JobsRoute: typeof JobsRoute
+  MailsRoute: typeof MailsRoute
+  PlannerRoute: typeof PlannerRoute
+  ProfileRoute: typeof ProfileRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SocialRoute: typeof SocialRoute
+  SoftSkillsRoute: typeof SoftSkillsRoute
+  TechSkillsRoute: typeof TechSkillsRoute
+  ToolsRoute: typeof ToolsRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/tools": {
-      id: "/tools";
-      path: "/tools";
-      fullPath: "/tools";
-      preLoaderRoute: typeof ToolsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/tech-skills": {
-      id: "/tech-skills";
-      path: "/tech-skills";
-      fullPath: "/tech-skills";
-      preLoaderRoute: typeof TechSkillsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/soft-skills": {
-      id: "/soft-skills";
-      path: "/soft-skills";
-      fullPath: "/soft-skills";
-      preLoaderRoute: typeof SoftSkillsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/social": {
-      id: "/social";
-      path: "/social";
-      fullPath: "/social";
-      preLoaderRoute: typeof SocialRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/sitemap.xml": {
-      id: "/sitemap.xml";
-      path: "/sitemap.xml";
-      fullPath: "/sitemap.xml";
-      preLoaderRoute: typeof SitemapDotxmlRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/profile": {
-      id: "/profile";
-      path: "/profile";
-      fullPath: "/profile";
-      preLoaderRoute: typeof ProfileRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/planner": {
-      id: "/planner";
-      path: "/planner";
-      fullPath: "/planner";
-      preLoaderRoute: typeof PlannerRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/mails": {
-      id: "/mails";
-      path: "/mails";
-      fullPath: "/mails";
-      preLoaderRoute: typeof MailsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/jobs": {
-      id: "/jobs";
-      path: "/jobs";
-      fullPath: "/jobs";
-      preLoaderRoute: typeof JobsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/interview": {
-      id: "/interview";
-      path: "/interview";
-      fullPath: "/interview";
-      preLoaderRoute: typeof InterviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/cv": {
-      id: "/cv";
-      path: "/cv";
-      fullPath: "/cv";
-      preLoaderRoute: typeof CvRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/connectors": {
-      id: "/connectors";
-      path: "/connectors";
-      fullPath: "/connectors";
-      preLoaderRoute: typeof ConnectorsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/auth": {
-      id: "/auth";
-      path: "/auth";
-      fullPath: "/auth";
-      preLoaderRoute: typeof AuthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/activities": {
-      id: "/activities";
-      path: "/activities";
-      fullPath: "/activities";
-      preLoaderRoute: typeof ActivitiesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tech-skills': {
+      id: '/tech-skills'
+      path: '/tech-skills'
+      fullPath: '/tech-skills'
+      preLoaderRoute: typeof TechSkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/soft-skills': {
+      id: '/soft-skills'
+      path: '/soft-skills'
+      fullPath: '/soft-skills'
+      preLoaderRoute: typeof SoftSkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/social': {
+      id: '/social'
+      path: '/social'
+      fullPath: '/social'
+      preLoaderRoute: typeof SocialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planner': {
+      id: '/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof PlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mails': {
+      id: '/mails'
+      path: '/mails'
+      fullPath: '/mails'
+      preLoaderRoute: typeof MailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interview': {
+      id: '/interview'
+      path: '/interview'
+      fullPath: '/interview'
+      preLoaderRoute: typeof InterviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cv': {
+      id: '/cv'
+      path: '/cv'
+      fullPath: '/cv'
+      preLoaderRoute: typeof CvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connectors': {
+      id: '/connectors'
+      path: '/connectors'
+      fullPath: '/connectors'
+      preLoaderRoute: typeof ConnectorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activities': {
+      id: '/activities'
+      path: '/activities'
+      fullPath: '/activities'
+      preLoaderRoute: typeof ActivitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,7 +351,7 @@ const rootRouteChildren: RootRouteChildren = {
   SoftSkillsRoute: SoftSkillsRoute,
   TechSkillsRoute: TechSkillsRoute,
   ToolsRoute: ToolsRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

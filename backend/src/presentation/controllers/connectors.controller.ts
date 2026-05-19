@@ -1,70 +1,56 @@
 import { Router, Request, Response } from "express";
-import { db } from "../../infrastructure/database/index.js";
-import { connectors } from "../../domain/schema.js";
-import { eq, and } from "drizzle-orm";
-import { requireUser, stripDates, isUUID } from "../middleware/auth.js";
+import { requireUser } from "../middleware/auth.js";
+import { ConnectorsService } from "../../application/services/connectors.service.js";
 
 export const getAll = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  res.json(await db.select().from(connectors).where(eq(connectors.userId, uid)));
+  try {
+    const data = await ConnectorsService.getAll(uid);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch connectors" });
+  }
 };
 
 export const create = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const { id, ...raw } = req.body;
-  const data = stripDates(raw);
-  const safeId = isUUID(id) ? id : undefined;
-  const existing = safeId
-    ? await db
-        .select()
-        .from(connectors)
-        .where(and(eq(connectors.id, safeId), eq(connectors.userId, uid)))
-    : [];
-
-  if (existing.length > 0) {
-    const [r] = await db
-      .update(connectors)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(connectors.id, safeId!))
-      .returning();
-    res.json(r);
-  } else {
-    const [r] = await db
-      .insert(connectors)
-      .values({ ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any)
-      .returning();
-    res.json(r);
+  try {
+    const result = await ConnectorsService.create(uid, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create connector" });
   }
 };
 
 export const createBulk = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  const items = req.body as any[];
-  if (!items.length) {
-    res.json([]);
-    return;
+  try {
+    const items = Array.isArray(req.body) ? req.body : [];
+    const result = await ConnectorsService.createBulk(uid, items);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create bulk connectors" });
   }
-  const values = items.map(({ id, ...raw }) => {
-    const data = stripDates(raw);
-    const safeId = isUUID(id) ? id : undefined;
-    return { ...data, userId: uid, ...(safeId ? { id: safeId } : {}) } as any;
-  });
-  const result = await db.insert(connectors).values(values).onConflictDoNothing().returning();
-  res.json(result);
 };
 
 export const deleteById = async (req: Request, res: Response) => {
   const uid = requireUser(req, res);
   if (!uid) return;
-  if (!isUUID(req.params.id)) {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await ConnectorsService.deleteById(uid, id);
     res.json({ ok: true });
-    return;
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete connector" });
   }
-  await db
-    .delete(connectors)
-    .where(and(eq(connectors.id, req.params.id), eq(connectors.userId, uid)));
-  res.json({ ok: true });
 };
+
+const router = Router();
+router.get("/", getAll);
+router.post("/", create);
+router.post("/bulk", createBulk);
+router.delete("/:id", deleteById);
+export default router;

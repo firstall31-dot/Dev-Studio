@@ -1514,7 +1514,7 @@
  * # --- SOCIAL DRAFTS ---
  * /api/social:
  *   get:
- *     summary: Retrieve all social media drafts (Alias: /api/social-drafts)
+ *     summary: "Retrieve all social media drafts (Alias: /api/social-drafts)"
  *     tags:
  *       - Social
  *     security:
@@ -1589,7 +1589,7 @@
  * # --- MAIL TEMPLATES ---
  * /api/mail:
  *   get:
- *     summary: Retrieve all cold mail/message templates (Alias: /api/mail-templates)
+ *     summary: "Retrieve all cold mail/message templates (Alias: /api/mail-templates)"
  *     tags:
  *       - Mail
  *     security:
@@ -1664,7 +1664,7 @@
  * # --- INTERVIEW & PROGRESS ---
  * /api/interview/questions:
  *   get:
- *     summary: Retrieve interview questions (Alias: /api/interview-questions)
+ *     summary: "Retrieve interview questions (Alias: /api/interview-questions)"
  *     tags:
  *       - Interview
  *     security:
@@ -1738,7 +1738,7 @@
  *
  * /api/interview/progress:
  *   get:
- *     summary: Retrieve user progress checklist (Alias: /api/progress)
+ *     summary: "Retrieve user progress checklist (Alias: /api/progress)"
  *     tags:
  *       - Interview
  *     security:
@@ -1857,7 +1857,7 @@
  *
  * /api/offers:
  *   get:
- *     summary: Retrieve freelance project offers (Alias: /api/freelance-offers)
+ *     summary: "Retrieve freelance project offers (Alias: /api/freelance-offers)"
  *     tags:
  *       - Offers
  *     security:
@@ -1931,7 +1931,7 @@
  *
  * /api/services:
  *   get:
- *     summary: Retrieve my listed gig services (Alias: /api/my-services)
+ *     summary: "Retrieve my listed gig services (Alias: /api/my-services)"
  *     tags:
  *       - Services
  *     security:
