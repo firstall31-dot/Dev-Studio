@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "npm install --include=dev",
+  "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": ".",
   "functions": {
