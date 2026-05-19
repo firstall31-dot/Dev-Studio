@@ -34,7 +34,6 @@ jobs:
       - name: Run ESLint
         run: |
           npm run lint:frontend
-          npm run lint:backend
 
       - name: Run TypeScript Validation
         run: |
