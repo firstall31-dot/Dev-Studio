@@ -211,6 +211,29 @@ function JobsPage() {
               onSave={handleSaveJob}
               onDelete={handleDeleteJob}
               onSaveRemote={handleSaveJob}
+              onSaveOffer={async (scraped) => {
+                try {
+                  const saved = await saveOffer({
+                    title: scraped.title ?? "",
+                    client: scraped.company ?? "Client",
+                    platform: scraped.source === "mostaql" ? "Mostaql" : "Khamsat",
+                    budget: scraped.salary ?? "",
+                    currency: "USD",
+                    status: "new",
+                    url: scraped.url ?? "",
+                    description: scraped.description ?? "",
+                    tags: scraped.tags ?? [],
+                    notes: "",
+                  });
+                  setOffers((prev) => {
+                    const idx = prev.findIndex((o) => o.id === saved.id);
+                    return idx >= 0 ? prev.map((o) => (o.id === saved.id ? saved : o)) : [...prev, saved];
+                  });
+                  toast.success("Project saved to Offers!");
+                } catch {
+                  toast.error("Failed to save offer.");
+                }
+              }}
               onBack={() => {
                 setActiveJobId(null);
                 setNewJob(false);

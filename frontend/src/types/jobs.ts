@@ -34,6 +34,32 @@ export {
   SERVICE_PLATFORMS,
 };
 
+export const JOB_CATEGORIES = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Freelance",
+  "Internship",
+  "Remote",
+] as const;
+
+export const OFFER_CATEGORIES = [
+  "Web Development",
+  "Mobile Development",
+  "UI/UX Design",
+  "Graphic Design",
+  "WordPress / CMS",
+  "E-commerce",
+  "Backend / API",
+  "Full Stack",
+  "Data & Analytics",
+  "Content Writing",
+  "SEO / Marketing",
+  "DevOps",
+  "Consulting",
+  "Other",
+] as const;
+
 export interface SavedJob {
   id: string;
   title: string;
@@ -44,6 +70,7 @@ export interface SavedJob {
   status: JobStatus;
   salary: string;
   remote: boolean;
+  category: string;
   tags: string[];
   notes: string;
   createdAt: number;
@@ -61,6 +88,7 @@ export interface FreelanceOffer {
   description: string;
   url: string;
   deadline: string;
+  category: string;
   tags: string[];
   notes: string;
   createdAt: number;
@@ -98,7 +126,6 @@ export interface RemoteJob {
   description?: string;
 }
 
-
 export const STATUS_COLORS: Record<string, string> = {
   saved: "bg-blue-500/15 text-blue-400 border-blue-500/20",
   applied: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
@@ -116,14 +143,16 @@ export const STATUS_COLORS: Record<string, string> = {
 
 export const PLATFORM_COLORS: Record<string, string> = {
   Fiverr: "bg-emerald-500/15 text-emerald-400",
-  Mostaql: "bg-orange-500/15 text-orange-400",
-  Khamsat: "bg-amber-500/15 text-amber-400",
+  Mostaql: "bg-amber-500/15 text-amber-400",
+  Khamsat: "bg-rose-500/15 text-rose-400",
   Upwork: "bg-green-500/15 text-green-400",
   Freelancer: "bg-blue-500/15 text-blue-400",
   LinkedIn: "bg-sky-500/15 text-sky-400",
   Indeed: "bg-indigo-500/15 text-indigo-400",
   RemoteOK: "bg-cyan-500/15 text-cyan-400",
-  Toptal: "bg-blue-500/15 text-blue-400",
+  Wuzzuf: "bg-teal-500/15 text-teal-400",
+  Bayt: "bg-orange-500/15 text-orange-400",
+  Toptal: "bg-blue-600/15 text-blue-300",
   PeoplePerHour: "bg-orange-500/15 text-orange-400",
   Glassdoor: "bg-teal-500/15 text-teal-400",
   AngelList: "bg-rose-500/15 text-rose-400",

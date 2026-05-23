@@ -3,24 +3,51 @@ export async function scrapeWuzzuf(
   location: string,
   days: number,
 ): Promise<any[]> {
+  const headers = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+  };
+
   const locParam = location
     ? `&filters[city][]=${encodeURIComponent(location)}`
     : "";
-  const url = `https://wuzzuf.net/search/jobs/?q=${encodeURIComponent(query)}${locParam}&a=hpb`;
-  const r = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      Accept: "text/html,application/xhtml+xml",
-    },
+  const searchUrl = `https://wuzzuf.net/search/jobs/?q=${encodeURIComponent(query)}${locParam}&a=hpb`;
+
+  const r = await fetch(searchUrl, {
+    headers,
     signal: AbortSignal.timeout(10000),
   });
+
+  if (r.status === 403 || r.status === 429 || r.status === 503) {
+    console.warn(`[wuzzuf] Blocked (${r.status}) — returning empty`);
+    return [];
+  }
   if (!r.ok) throw new Error(`Wuzzuf ${r.status}`);
+
   const html = await r.text();
+
+  const isChallenge =
+    html.includes("Just a moment") ||
+    (html.includes("cloudflare") && !html.includes("__NEXT_DATA__") && html.length < 50000);
+
+  if (isChallenge) {
+    console.warn("[wuzzuf] Cloudflare challenge detected — returning empty");
+    return [];
+  }
+
   const nd = html.match(
     /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/,
   );
-  if (!nd) throw new Error("Wuzzuf: no __NEXT_DATA__");
+  if (!nd) {
+    console.warn("[wuzzuf] No __NEXT_DATA__ found — page may have changed");
+    return [];
+  }
+
   const data = JSON.parse(nd[1]);
   const raw: any[] = data?.props?.pageProps?.jobs ?? [];
   const cutoff = Date.now() - days * 86400000;

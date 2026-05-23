@@ -20,12 +20,15 @@ const statusLabel: Record<string, string> = {
   completed: "Done",
 };
 
-type OfferFilter = "all" | "new" | "in_review";
+type OfferFilter = "all" | "new" | "in_review" | "accepted" | "completed" | "rejected";
 
 const FILTERS: { label: string; value: OfferFilter }[] = [
   { label: "All", value: "all" },
   { label: "New", value: "new" },
   { label: "In Review", value: "in_review" },
+  { label: "Accepted", value: "accepted" },
+  { label: "Done", value: "completed" },
+  { label: "Rejected", value: "rejected" },
 ];
 
 export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
@@ -35,7 +38,8 @@ export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
   const filtered = offers.filter((o) => {
     const matchesSearch =
       (o.title ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (o.client ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+      (o.client ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (o.platform ?? "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === "all" || o.status === activeFilter;
     return matchesSearch && matchesFilter;
   });
@@ -78,20 +82,27 @@ export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
       </div>
 
       {/* Filters */}
-      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 shrink-0">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setActiveFilter(f.value)}
-            className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
-              activeFilter === f.value
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 flex-wrap shrink-0">
+        {FILTERS.map((f) => {
+          const count = f.value === "all" ? offers.length : offers.filter((o) => o.status === f.value).length;
+          if (f.value !== "all" && count === 0) return null;
+          return (
+            <button
+              key={f.value}
+              onClick={() => setActiveFilter(f.value)}
+              className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
+                activeFilter === f.value
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              }`}
+            >
+              {f.label}
+              {count > 0 && f.value !== "all" && (
+                <span className="ml-1 opacity-60">({count})</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Divider */}
@@ -147,6 +158,16 @@ export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
                   {offer.budget && (
                     <span className="text-[9px] text-green-400 font-medium">
                       {offer.budget} {offer.currency}
+                    </span>
+                  )}
+                  {offer.category && (
+                    <span className="text-[9px] text-muted-foreground/70 truncate">
+                      {offer.category}
+                    </span>
+                  )}
+                  {offer.deadline && (
+                    <span className="text-[9px] text-muted-foreground/60">
+                      Due {offer.deadline}
                     </span>
                   )}
                 </div>

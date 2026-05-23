@@ -12,21 +12,37 @@ export async function scrapeBayt(
     `/en/international/jobs/${safeSlug}-jobs/`,
     "https://www.bayt.com",
   ).toString();
+
   const r = await fetch(url, {
     headers: {
       "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
       Accept: "text/html,application/xhtml+xml",
       "Accept-Language": "en-US,en;q=0.9",
+      "Accept-Encoding": "gzip, deflate, br",
+      Referer: "https://www.bayt.com/",
     },
     signal: AbortSignal.timeout(10000),
   });
+
+  if (r.status === 403 || r.status === 429 || r.status === 503 || r.status === 401) {
+    console.warn(`[bayt] Blocked (${r.status}) — returning empty`);
+    return [];
+  }
   if (!r.ok) throw new Error(`Bayt ${r.status}`);
+
   const html = await r.text();
+
+  if (html.includes("Access Denied") || html.includes("captcha") || html.length < 5000) {
+    console.warn("[bayt] Access denied or unexpected response — returning empty");
+    return [];
+  }
+
   const jobs: any[] = [];
   const ldRe = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
   let m: RegExpExecArray | null;
   const cutoff = Date.now() - days * 86400000;
+
   while ((m = ldRe.exec(html)) !== null && jobs.length < 20) {
     try {
       const obj = JSON.parse(m[1]);
@@ -62,5 +78,6 @@ export async function scrapeBayt(
       console.warn("[bayt] Failed to parse JSON-LD script:", err);
     }
   }
+
   return jobs;
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, Trash2, ExternalLink, Handshake } from "lucide-react";
 import type { FreelanceOffer, OfferStatus } from "./types";
-import { OFFER_STATUSES, OFFER_PLATFORMS } from "./types";
+import { OFFER_STATUSES, OFFER_PLATFORMS, OFFER_CATEGORIES } from "./types";
 import { toast } from "sonner";
 
 interface Props {
@@ -21,6 +21,7 @@ const EMPTY: Partial<FreelanceOffer> = {
   description: "",
   url: "",
   deadline: "",
+  category: "",
   tags: [],
   notes: "",
 };
@@ -140,6 +141,34 @@ export function OfferEditor({ offer, isNew, onSave, onDelete }: Props) {
               </select>
             </Field>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Category">
+              <select
+                className={inp}
+                value={form.category ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+              >
+                <option value="">Select category</option>
+                {OFFER_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Status">
+              <select
+                className={inp}
+                value={form.status ?? "new"}
+                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as OfferStatus }))}
+              >
+                {OFFER_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
+
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
               <Field label="Budget">
@@ -165,29 +194,14 @@ export function OfferEditor({ offer, isNew, onSave, onDelete }: Props) {
               </select>
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Status">
-              <select
-                className={inp}
-                value={form.status ?? "new"}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as OfferStatus }))}
-              >
-                {OFFER_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Deadline">
-              <input
-                type="date"
-                className={inp}
-                value={form.deadline ?? ""}
-                onChange={(e) => setForm((p) => ({ ...p, deadline: e.target.value }))}
-              />
-            </Field>
-          </div>
+          <Field label="Deadline">
+            <input
+              type="date"
+              className={inp}
+              value={form.deadline ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, deadline: e.target.value }))}
+            />
+          </Field>
           <Field label="Offer URL">
             <input
               type="url"

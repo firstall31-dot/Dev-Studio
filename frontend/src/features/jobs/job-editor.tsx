@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, ExternalLink, Loader2, Trash2 } from "lucide-react";
 import type { SavedJob, JobStatus } from "./types";
-import { JOB_STATUSES, JOB_PLATFORMS } from "./types";
+import { JOB_STATUSES, JOB_PLATFORMS, JOB_CATEGORIES } from "./types";
 import { JobBrowser } from "./job-browser";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ interface Props {
   onSave: (job: Partial<SavedJob>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onSaveRemote: (job: Partial<SavedJob>) => Promise<void>;
+  onSaveOffer?: (job: any) => Promise<void>;
   onBack: () => void;
 }
 
@@ -23,11 +24,12 @@ const EMPTY: Partial<SavedJob> = {
   status: "saved",
   salary: "",
   remote: false,
+  category: "",
   tags: [],
   notes: "",
 };
 
-export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }: Props) {
+export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onSaveOffer, onBack }: Props) {
   const [form, setForm] = useState<Partial<SavedJob>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -44,7 +46,7 @@ export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }
   }, [job, isNew]);
 
   if (!job && !isNew) {
-    return <JobBrowser onSaveJob={onSaveRemote} />;
+    return <JobBrowser onSaveJob={onSaveRemote} onSaveOffer={onSaveOffer} />;
   }
 
   const handleSave = async () => {
@@ -164,6 +166,18 @@ export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }
           </div>
 
           <div className="grid grid-cols-2 gap-3">
+            <Field label="Job Type">
+              <select
+                className={inp}
+                value={form.category ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+              >
+                <option value="">Any type</option>
+                {JOB_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </Field>
             <Field label="Salary">
               <input
                 className={inp}
@@ -172,16 +186,17 @@ export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }
                 placeholder="$80k – $120k"
               />
             </Field>
-            <Field label="Job URL">
-              <input
-                type="url"
-                className={inp}
-                value={form.url ?? ""}
-                onChange={(e) => setForm((p) => ({ ...p, url: e.target.value }))}
-                placeholder="https://…"
-              />
-            </Field>
           </div>
+
+          <Field label="Job URL">
+            <input
+              type="url"
+              className={inp}
+              value={form.url ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, url: e.target.value }))}
+              placeholder="https://…"
+            />
+          </Field>
 
           <div className="flex items-center gap-2">
             <input

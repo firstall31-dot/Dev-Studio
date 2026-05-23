@@ -145,7 +145,7 @@ export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
                           {job.company}
                         </p>
                       )}
-                      <div className="flex items-center gap-1.5 mt-1">
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         <span
                           className={`text-[9px] px-1.5 py-0.5 rounded-lg border font-medium ${STATUS_COLORS[job.status] ?? ""}`}
                         >
@@ -154,6 +154,11 @@ export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
                         {job.platform && (
                           <span className="text-[9px] text-muted-foreground truncate">
                             {job.platform}
+                          </span>
+                        )}
+                        {job.category && (
+                          <span className="text-[9px] text-muted-foreground/70 truncate">
+                            · {job.category}
                           </span>
                         )}
                       </div>

@@ -24,10 +24,13 @@ interface ScrapedJob {
   logo?: string;
 }
 
+const FREELANCE_SOURCES = new Set(["mostaql", "khamsat"]);
+
 interface Props {
   onSaveJob: (job: Partial<SavedJob>) => Promise<void>;
+  onSaveOffer?: (job: ScrapedJob) => Promise<void>;
 }
-import { CATEGORIES, TIME_OPTIONS, SOURCES, SOURCE_BADGE } from "@/data/jobs/jobs";
+import { CATEGORIES, TIME_OPTIONS, SOURCES, SOURCE_BADGE, SOURCE_PLATFORM_NAME } from "@/data/jobs/jobs";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -39,18 +42,19 @@ function timeAgo(iso: string): string {
   return `${Math.floor(d / 7)}w ago`;
 }
 
-export function JobBrowser({ onSaveJob }: Props) {
+export function JobBrowser({ onSaveJob, onSaveOffer }: Props) {
   const [category, setCategory] = useState("fullstack");
   const [query, setQuery] = useState("full stack developer");
   const [location, setLocation] = useState("");
   const [days, setDays] = useState(1);
-  const [sources, setSources] = useState(["indeed", "wuzzuf", "bayt", "remoteok"]);
+  const [sources, setSources] = useState(["indeed", "wuzzuf", "bayt", "remoteok", "mostaql", "khamsat"]);
 
   const [results, setResults] = useState<ScrapedJob[]>([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [fetched, setFetched] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [savingOfferId, setSavingOfferId] = useState<string | null>(null);
 
   const pickCategory = (cat: (typeof CATEGORIES)[0]) => {
     setCategory(cat.id);
@@ -98,15 +102,23 @@ export function JobBrowser({ onSaveJob }: Props) {
         location: job.location,
         url: job.url,
         status: "saved",
-        platform:
-          { indeed: "Indeed", wuzzuf: "Wuzzuf", bayt: "Bayt", remoteok: "RemoteOK" }[job.source] ??
-          job.source,
-        remote: job.source === "remoteok",
+        platform: SOURCE_PLATFORM_NAME[job.source] ?? job.source,
+        remote: job.source === "remoteok" || job.location?.toLowerCase().includes("remote"),
         tags: job.tags ?? [],
         salary: job.salary ?? "",
       });
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const handleSaveAsOffer = async (job: ScrapedJob) => {
+    if (!onSaveOffer) return;
+    setSavingOfferId(job.id);
+    try {
+      await onSaveOffer(job);
+    } finally {
+      setSavingOfferId(null);
     }
   };
 
@@ -245,8 +257,8 @@ export function JobBrowser({ onSaveJob }: Props) {
             <p className="text-sm font-semibold">Browse Jobs from Top Sites</p>
             <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
               Search across <strong>Indeed</strong>, <strong>Wuzzuf</strong>, <strong>Bayt</strong>,
-              and <strong>RemoteOK</strong> at once. Default: <em>Full Stack Developer</em> — last
-              24 hours.
+              <strong>RemoteOK</strong>, <strong>Mostaql</strong>, and <strong>Khamsat</strong> at
+              once. Default: <em>Full Stack Developer</em> — last 24 hours.
             </p>
             <button
               onClick={handleSearch}
@@ -344,22 +356,38 @@ export function JobBrowser({ onSaveJob }: Props) {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="size-6 grid place-items-center rounded border border-border hover:bg-sidebar-accent/40 text-muted-foreground hover:text-foreground transition-colors"
-                          title="Open job listing"
+                          title="Open listing"
                         >
                           <ExternalLink className="size-3" />
                         </a>
-                        <button
-                          onClick={() => handleSave(job)}
-                          disabled={savingId === job.id}
-                          className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors disabled:opacity-50"
-                        >
-                          {savingId === job.id ? (
-                            <Loader2 className="size-3 animate-spin" />
-                          ) : (
-                            <Bookmark className="size-3" />
-                          )}
-                          Save
-                        </button>
+                        {FREELANCE_SOURCES.has(job.source) && onSaveOffer ? (
+                          <button
+                            onClick={() => handleSaveAsOffer(job)}
+                            disabled={savingOfferId === job.id}
+                            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded transition-colors disabled:opacity-50"
+                            title="Track this project as a freelance offer"
+                          >
+                            {savingOfferId === job.id ? (
+                              <Loader2 className="size-3 animate-spin" />
+                            ) : (
+                              <Bookmark className="size-3" />
+                            )}
+                            Add Offer
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleSave(job)}
+                            disabled={savingId === job.id}
+                            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors disabled:opacity-50"
+                          >
+                            {savingId === job.id ? (
+                              <Loader2 className="size-3 animate-spin" />
+                            ) : (
+                              <Bookmark className="size-3" />
+                            )}
+                            Save
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
