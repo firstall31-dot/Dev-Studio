@@ -153,6 +153,43 @@ export const ASSET_KINDS = [
 ] as const;
 export type AssetKind = (typeof ASSET_KINDS)[number];
 
+// --- Activity / Audit Log Enums ---
+
+export const ACTIVITY_ACTIONS = [
+  "create",
+  "update",
+  "delete",
+  "view",
+  "login",
+  "logout",
+  "export",
+  "import",
+  "run",
+  "share",
+] as const;
+export type ActivityAction = (typeof ACTIVITY_ACTIONS)[number];
+
+export const ACTIVITY_ENTITY_TYPES = [
+  "prompt",
+  "agent",
+  "snippet",
+  "template",
+  "component",
+  "saved_job",
+  "freelance_offer",
+  "my_service",
+  "connector",
+  "social_draft",
+  "mail_template",
+  "cv",
+  "planner_task",
+  "chat",
+  "interview",
+  "profile",
+  "auth",
+] as const;
+export type ActivityEntityType = (typeof ACTIVITY_ENTITY_TYPES)[number];
+
 // --- Integrations Enums ---
 
 export const CONNECTOR_TYPES = ["companies", "hr", "clients"] as const;
