@@ -8,6 +8,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FocusArea } from "@/types/common";
 import type { SkillAreaData, InterviewQuestion } from "@/types/skills";
 import { DIFFICULTIES } from "@/data/tech/interview";
+import { usePagination } from "@/hooks/use-pagination";
+import { ListPagination } from "@/components/ui/list-pagination";
 
 interface Props {
   data: SkillAreaData;
@@ -41,6 +43,13 @@ export function InterviewSection({ data, subAreaId, triggerAdd }: Props) {
         .filter((q) => !search || q.question.toLowerCase().includes(search.toLowerCase())),
     [interviewQuestions, data.id, diff, search],
   );
+
+  const { page, setPage, totalPages, paged, total, pageSize } = usePagination(filteredQs, 10);
+
+  // Reset to page 1 whenever search or difficulty filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [search, diff, setPage]);
 
   const toggleExpanded = (id: string) =>
     setExpanded((p) => {
@@ -106,7 +115,13 @@ export function InterviewSection({ data, subAreaId, triggerAdd }: Props) {
       </div>
 
       <div className="space-y-3">
-        {filteredQs.map((q) => (
+        {total > 0 && (
+          <p className="text-[11px] text-muted-foreground font-mono px-1">
+            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total} questions
+          </p>
+        )}
+
+        {paged.map((q) => (
           <QACard
             key={q.id}
             item={q}
@@ -117,6 +132,7 @@ export function InterviewSection({ data, subAreaId, triggerAdd }: Props) {
             onDelete={() => setPendingDeleteId(q.id)}
           />
         ))}
+
         {filteredQs.length === 0 && (
           <div className="text-center py-20 border border-dashed border-border rounded-xl bg-muted/20">
             <p className="text-sm text-muted-foreground">
@@ -127,6 +143,15 @@ export function InterviewSection({ data, subAreaId, triggerAdd }: Props) {
             </button>
           </div>
         )}
+
+        <ListPagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          className="mt-2"
+        />
       </div>
 
       <QAEditorDialog
