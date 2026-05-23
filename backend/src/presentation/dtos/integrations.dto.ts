@@ -26,7 +26,7 @@ export const SocialDraftDto = z.object({
   id: uuidOptional,
   platform: z.enum(SOCIAL_PLATFORMS),
   content: z.string().min(1, "Content is required").max(5000),
-  mediaUrls: z.array(z.string().url()).default([]),
+  mediaUrls: z.array(z.string()).default([]),
   category: z.string().max(80).default(""),
   tags: tagsArray,
   slug: z.string().max(120).default(""),

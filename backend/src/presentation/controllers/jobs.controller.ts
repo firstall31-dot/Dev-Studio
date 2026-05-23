@@ -64,3 +64,19 @@ export const getScrape = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to scrape jobs" });
   }
 };
+
+export const postScrape = async (req: Request, res: Response) => {
+  const uid = requireUser(req, res);
+  if (!uid) return;
+  try {
+    const { query = "full stack developer", location = "", days = 1, sources = [] } = req.body ?? {};
+    const sourcesArr = Array.isArray(sources) && sources.length
+      ? sources
+      : ["indeed", "wuzzuf", "bayt", "remoteok"];
+    const safeDays = Math.max(1, Math.min(Number(days) || 1, 30));
+    const result = await jobsService.scrapeJobs(String(query), String(location), safeDays, sourcesArr);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to scrape jobs" });
+  }
+};

@@ -63,4 +63,6 @@ export function registerRoutes(app: Express) {
   app.use("/api/mail-templates", mailRoutes);
   app.use("/api/freelance-offers", offerRoutes);
   app.use("/api/my-services", serviceRoutes);
+  app.use("/api/jobs/offers", offerRoutes);
+  app.use("/api/jobs/services", serviceRoutes);
 }

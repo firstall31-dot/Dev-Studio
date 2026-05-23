@@ -4,18 +4,27 @@ import { CV_FOCUSES } from "../../domain/enums.js";
 const uuidOptional = z.string().uuid().optional();
 const tagsArray = z.array(z.string()).default([]);
 
+const toJsonString = (fallback: string) =>
+  z.preprocess(
+    (v) => {
+      if (v === undefined || v === null) return fallback;
+      return typeof v === "string" ? v : JSON.stringify(v);
+    },
+    z.string(),
+  );
+
 // ── CV Profile ────────────────────────────────────────────────────────────────
 export const CvProfileDto = z.object({
   id: uuidOptional,
   title: z.string().min(1, "Title is required").max(200).default("My CV"),
   focus: z.enum(CV_FOCUSES).default("general"),
-  personalInfo: z.string().default("{}"),
+  personalInfo: toJsonString("{}"),
   summary: z.string().default(""),
-  experience: z.string().default("[]"),
-  skills: z.string().default("{}"),
-  education: z.string().default("[]"),
-  projects: z.string().default("[]"),
-  languages: z.string().default("[]"),
+  experience: toJsonString("[]"),
+  skills: toJsonString("{}"),
+  education: toJsonString("[]"),
+  projects: toJsonString("[]"),
+  languages: toJsonString("[]"),
   category: z.string().max(80).default(""),
   tags: tagsArray,
   slug: z.string().max(120).default(""),
