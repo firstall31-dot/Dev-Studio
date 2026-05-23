@@ -3,16 +3,52 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useForge, fillVariables, newId } from "@/lib/store";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
-import { Sparkles, Star, Copy, Plus, Trash2, History, Wand2, Search } from "lucide-react";
+import { Sparkles, Star, Copy, Plus, Trash2, History, Search, Brain, Zap } from "lucide-react";
 import { toast } from "sonner";
 import type { Prompt } from "@/types/tools";
 import { Field, Input, TextArea } from "./shared";
 import { SplitLayout } from "../../components/layout";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+
+// ── Model registry ────────────────────────────────────────────────────────────
+
+interface ModelOption {
+  id: string;
+  label: string;
+  provider: "openai" | "anthropic" | "google";
+  thinking?: boolean;
+  fast?: boolean;
+}
+
+const MODELS: ModelOption[] = [
+  { id: "gpt-5", label: "GPT-5", provider: "openai", fast: true },
+  { id: "gpt-5-mini", label: "GPT-5 Mini", provider: "openai", fast: true },
+  { id: "o3", label: "o3 (Thinking)", provider: "openai", thinking: true },
+  { id: "o4-mini", label: "o4-mini (Thinking)", provider: "openai", thinking: true, fast: true },
+  { id: "claude-3.5-sonnet", label: "Claude 3.5 Sonnet", provider: "anthropic" },
+  { id: "claude-3.7-sonnet", label: "Claude 3.7 Sonnet", provider: "anthropic", thinking: true },
+  { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro", provider: "google", thinking: true },
+];
+
+const PROVIDER_BADGE: Record<ModelOption["provider"], string> = {
+  openai: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  anthropic: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  google: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+};
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function Prompts({ selectedId }: { selectedId?: string }) {
   const navigate = useNavigate({ from: "/tools" });
-  const search = useSearch({ from: "/tools" });
+  useSearch({ from: "/tools" });
   const { prompts, upsertPrompt, deletePrompt, toggleFavoritePrompt, incrementPromptUsage } =
     useForge();
   const [query, setQuery] = useState("");
@@ -41,8 +77,9 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
   const { page, setPage, totalPages, paged, total, pageSize } = usePagination(filtered, 15);
 
   const selected = selectedId ? prompts.find((p) => p.id === selectedId) : filtered[0];
+  const selectedModel = MODELS.find((m) => m.id === selected?.model) ?? null;
 
-  const select = (pid: string) => navigate({ search: (prev) => ({ ...prev, id: pid }) });
+  const select = (pid: string) => navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, id: pid }) });
 
   const create = () => {
     const p: Prompt = {
@@ -53,6 +90,7 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
       tags: [],
       body: "Write your prompt here. Use {{variable}} placeholders.",
       variables: [],
+      model: "gpt-5",
       usageCount: 0,
       versions: [],
       createdAt: Date.now(),
@@ -86,7 +124,7 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
   const handleDelete = () => {
     if (!selected) return;
     deletePrompt(selected.id);
-    navigate({ search: (prev) => ({ ...prev, id: undefined }) });
+    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, id: undefined }) });
     toast.success("Prompt deleted");
   };
 
@@ -135,6 +173,7 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
       <ul className="overflow-y-auto scrollbar-thin p-2 space-y-0.5 flex-1">
         {paged.map((p) => {
           const active = selected?.id === p.id;
+          const mdl = MODELS.find((m) => m.id === p.model);
           return (
             <li key={p.id}>
               <button
@@ -153,6 +192,9 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
                   >
                     {p.category}
                   </span>
+                  {mdl?.thinking && (
+                    <Brain className="size-3 text-violet-400 shrink-0" />
+                  )}
                   {p.favorite && <Star className="size-3 text-amber-400 fill-amber-400 ml-auto" />}
                 </div>
                 <p
@@ -237,14 +279,51 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
                   onChange={(e) => updateSelected({ category: e.target.value })}
                 />
               </Field>
+
               <Field label="Model">
-                <Input
-                  value={selected.model ?? ""}
-                  onChange={(e) => updateSelected({ model: e.target.value })}
-                  placeholder="claude-3.5-sonnet"
-                  className="font-mono"
-                />
+                <Select
+                  value={selected.model ?? "gpt-5"}
+                  onValueChange={(value) => updateSelected({ model: value })}
+                >
+                  <SelectTrigger className="h-8 text-xs font-mono">
+                    <SelectValue>
+                      <span className="flex items-center gap-1.5">
+                        {selectedModel?.thinking && (
+                          <Brain className="size-3 text-violet-400" />
+                        )}
+                        {selectedModel?.fast && !selectedModel?.thinking && (
+                          <Zap className="size-3 text-yellow-400" />
+                        )}
+                        {selectedModel?.label ?? selected.model ?? "Select model"}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MODELS.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <div className="flex items-center gap-2 py-0.5">
+                          <span className="flex-1 text-xs">{m.label}</span>
+                          <span
+                            className={cn(
+                              "text-[9px] px-1.5 py-0.5 rounded border font-medium shrink-0",
+                              PROVIDER_BADGE[m.provider],
+                            )}
+                          >
+                            {m.provider}
+                          </span>
+                          {m.thinking && (
+                            <Brain className="size-3 text-violet-400 shrink-0" />
+                          )}
+                          {m.fast && !m.thinking && (
+                            <Zap className="size-3 text-yellow-400 shrink-0" />
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </Field>
+
               <Field label="Tags">
                 <Input
                   value={selected.tags.join(", ")}
@@ -260,6 +339,22 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
                 />
               </Field>
             </div>
+
+            {/* Thinking model callout */}
+            {selectedModel?.thinking && (
+              <div className="flex items-start gap-3 rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 mb-6">
+                <Brain className="size-4 text-violet-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-violet-300">
+                    Thinking model — {selectedModel.label}
+                  </p>
+                  <p className="text-[11px] text-violet-300/70 mt-0.5">
+                    This prompt is optimized for a reasoning model. It will use extended
+                    chain-of-thought before producing a response.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="mb-6">
               <label className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 block mb-2">
@@ -322,12 +417,23 @@ export function Prompts({ selectedId }: { selectedId?: string }) {
               >
                 <History className="size-4" /> Save version
               </button>
-              <button
-                onClick={() => toast.info("AI prompt enhancer — connect Lovable AI to enable")}
-                className="ml-auto inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider border border-accent/40 text-accent px-3 py-2 rounded-xl hover:bg-accent/10"
-              >
-                <Wand2 className="size-3.5" /> AI Enhance
-              </button>
+              {selectedModel && (
+                <div
+                  className={cn(
+                    "ml-auto inline-flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-xl border",
+                    selectedModel.thinking
+                      ? "border-violet-500/30 bg-violet-500/5 text-violet-400"
+                      : "border-border/60 text-muted-foreground bg-muted/30",
+                  )}
+                >
+                  {selectedModel.thinking ? (
+                    <Brain className="size-3.5" />
+                  ) : (
+                    <Sparkles className="size-3.5" />
+                  )}
+                  {selectedModel.label}
+                </div>
+              )}
             </div>
 
             {selected.versions.length > 0 && (

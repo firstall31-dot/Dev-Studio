@@ -453,7 +453,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Presence indicator */}
             <TooltipProvider delayDuration={0}>
-              <PresenceIndicator userId={user?.id} />
+              <ErrorBoundary fallback={<span />}>
+                <PresenceIndicator userId={user?.id} />
+              </ErrorBoundary>
             </TooltipProvider>
 
             {/* Theme toggle */}

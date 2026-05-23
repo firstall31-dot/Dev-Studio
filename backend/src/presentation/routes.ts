@@ -18,6 +18,7 @@ import cvRoutes from "./routes/cv.routes.js";
 import plannerRoutes from "./routes/planner.routes.js";
 import skillsRoutes from "./routes/skills.routes.js";
 import presenceRoutes from "./routes/presence.routes.js";
+import toolsRoutes from "./routes/tools.routes.js";
 
 export function registerRoutes(app: Express) {
   // --- Auth ---
@@ -42,6 +43,7 @@ export function registerRoutes(app: Express) {
   app.use("/api/planner", plannerRoutes);
   app.use("/api/skills", skillsRoutes);
   app.use("/api/presence", presenceRoutes);
+  app.use("/api/tools", toolsRoutes);
 
   // --- Legacy Backward Compatibility ---
 

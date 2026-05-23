@@ -22,11 +22,7 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 function getWsUrl(): string {
   const loc = window.location;
   const proto = loc.protocol === "https:" ? "wss:" : "ws:";
-  const backendPort = import.meta.env.VITE_API_PORT ?? "3001";
-  const host = import.meta.env.DEV
-    ? `${loc.hostname}:${backendPort}`
-    : loc.host;
-  return `${proto}//${host}/ws/presence`;
+  return `${proto}//${loc.host}/ws/presence`;
 }
 
 export function usePresence(userId: string | null | undefined): UsePresenceResult {
