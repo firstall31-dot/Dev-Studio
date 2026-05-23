@@ -18,12 +18,13 @@ const statusLabel: Record<string, string> = {
   draft: "Draft",
 };
 
-type ServiceFilter = "all" | "active" | "paused";
+type ServiceFilter = "all" | "active" | "paused" | "draft";
 
 const FILTERS: { label: string; value: ServiceFilter }[] = [
   { label: "All", value: "all" },
   { label: "Active", value: "active" },
   { label: "Paused", value: "paused" },
+  { label: "Draft", value: "draft" },
 ];
 
 export function ServicesSidebar({ services, activeId, onSelect, onAdd }: Props) {
@@ -33,7 +34,8 @@ export function ServicesSidebar({ services, activeId, onSelect, onAdd }: Props) 
   const filtered = services.filter((s) => {
     const matchesSearch =
       (s.title ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.category ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+      (s.category ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.platform ?? "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === "all" || s.status === activeFilter;
     return matchesSearch && matchesFilter;
   });
@@ -76,20 +78,27 @@ export function ServicesSidebar({ services, activeId, onSelect, onAdd }: Props) 
       </div>
 
       {/* Filters */}
-      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 shrink-0">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setActiveFilter(f.value)}
-            className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
-              activeFilter === f.value
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 flex-wrap shrink-0">
+        {FILTERS.map((f) => {
+          const count = f.value === "all" ? services.length : services.filter((s) => s.status === f.value).length;
+          if (f.value !== "all" && count === 0) return null;
+          return (
+            <button
+              key={f.value}
+              onClick={() => setActiveFilter(f.value)}
+              className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
+                activeFilter === f.value
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              }`}
+            >
+              {f.label}
+              {count > 0 && f.value !== "all" && (
+                <span className="ml-1 opacity-60">({count})</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Divider */}
@@ -145,6 +154,11 @@ export function ServicesSidebar({ services, activeId, onSelect, onAdd }: Props) 
                   {svc.price && (
                     <span className="text-[9px] text-green-400 font-medium">
                       {svc.price} {svc.currency}
+                    </span>
+                  )}
+                  {svc.deliveryDays && (
+                    <span className="text-[9px] text-muted-foreground/60">
+                      {svc.deliveryDays}d delivery
                     </span>
                   )}
                 </div>

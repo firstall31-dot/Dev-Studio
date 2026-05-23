@@ -53,7 +53,7 @@ export const getScrape = async (req: Request, res: Response) => {
     const query = String(req.query.q || "full stack developer");
     const location = String(req.query.location || "");
     const days = Math.max(1, Math.min(Number(req.query.days || 1), 30));
-    const sources = String(req.query.sources || "indeed,wuzzuf,bayt,remoteok")
+    const sources = String(req.query.sources || "indeed,wuzzuf,bayt,remoteok,mostaql,khamsat")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
@@ -72,7 +72,7 @@ export const postScrape = async (req: Request, res: Response) => {
     const { query = "full stack developer", location = "", days = 1, sources = [] } = req.body ?? {};
     const sourcesArr = Array.isArray(sources) && sources.length
       ? sources
-      : ["indeed", "wuzzuf", "bayt", "remoteok"];
+      : ["indeed", "wuzzuf", "bayt", "remoteok", "mostaql", "khamsat"];
     const safeDays = Math.max(1, Math.min(Number(days) || 1, 30));
     const result = await jobsService.scrapeJobs(String(query), String(location), safeDays, sourcesArr);
     res.json(result);

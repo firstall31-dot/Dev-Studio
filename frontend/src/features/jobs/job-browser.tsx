@@ -27,7 +27,7 @@ interface ScrapedJob {
 interface Props {
   onSaveJob: (job: Partial<SavedJob>) => Promise<void>;
 }
-import { CATEGORIES, TIME_OPTIONS, SOURCES, SOURCE_BADGE } from "@/data/jobs/jobs";
+import { CATEGORIES, TIME_OPTIONS, SOURCES, SOURCE_BADGE, SOURCE_PLATFORM_NAME } from "@/data/jobs/jobs";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -44,7 +44,7 @@ export function JobBrowser({ onSaveJob }: Props) {
   const [query, setQuery] = useState("full stack developer");
   const [location, setLocation] = useState("");
   const [days, setDays] = useState(1);
-  const [sources, setSources] = useState(["indeed", "wuzzuf", "bayt", "remoteok"]);
+  const [sources, setSources] = useState(["indeed", "wuzzuf", "bayt", "remoteok", "mostaql", "khamsat"]);
 
   const [results, setResults] = useState<ScrapedJob[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,10 +98,8 @@ export function JobBrowser({ onSaveJob }: Props) {
         location: job.location,
         url: job.url,
         status: "saved",
-        platform:
-          { indeed: "Indeed", wuzzuf: "Wuzzuf", bayt: "Bayt", remoteok: "RemoteOK" }[job.source] ??
-          job.source,
-        remote: job.source === "remoteok",
+        platform: SOURCE_PLATFORM_NAME[job.source] ?? job.source,
+        remote: job.source === "remoteok" || job.location?.toLowerCase().includes("remote"),
         tags: job.tags ?? [],
         salary: job.salary ?? "",
       });
@@ -245,8 +243,8 @@ export function JobBrowser({ onSaveJob }: Props) {
             <p className="text-sm font-semibold">Browse Jobs from Top Sites</p>
             <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
               Search across <strong>Indeed</strong>, <strong>Wuzzuf</strong>, <strong>Bayt</strong>,
-              and <strong>RemoteOK</strong> at once. Default: <em>Full Stack Developer</em> — last
-              24 hours.
+              <strong>RemoteOK</strong>, <strong>Mostaql</strong>, and <strong>Khamsat</strong> at
+              once. Default: <em>Full Stack Developer</em> — last 24 hours.
             </p>
             <button
               onClick={handleSearch}

@@ -13,8 +13,10 @@ export async function scrapeIndeedRSS(
   const url = `https://www.indeed.com/rss?q=${encodeURIComponent(query)}&l=${encodeURIComponent(location)}&sort=date&fromage=${days}`;
   const r = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)",
-      Accept: "text/xml,application/xml",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      Accept: "text/xml,application/xml,application/rss+xml,*/*",
+      "Accept-Language": "en-US,en;q=0.9",
     },
     signal: AbortSignal.timeout(8000),
   });
