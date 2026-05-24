@@ -7,6 +7,7 @@ import {
   Search,
   Plus,
   ChevronRight,
+  Layers,
   LucideIcon,
 } from "lucide-react";
 import type { SkillAreaData } from "@/types/skills";
@@ -14,10 +15,11 @@ import { OverviewSection } from "./overview-section";
 import { ChecklistSection } from "./checklist-section";
 import { InterviewSection } from "./interview-section";
 import { ResourcesSection } from "./resources-section";
+import { ServicesSection } from "./services-section";
 import { SplitLayout, TabNav } from "../../components/layout";
 import { cn } from "@/lib/utils";
 
-type SectionId = "overview" | "checklist" | "interview" | "resources";
+type SectionId = "overview" | "checklist" | "interview" | "resources" | "services";
 
 interface SubAreaTab {
   id: string;
@@ -30,6 +32,7 @@ const SECTIONS: { id: SectionId; label: string; icon: React.ElementType }[] = [
   { id: "checklist", label: "Checklist", icon: CheckSquare },
   { id: "interview", label: "Interview Q&A", icon: GraduationCap },
   { id: "resources", label: "Resources", icon: ExternalLink },
+  { id: "services", label: "Services", icon: Layers },
 ];
 
 const ADD_SECTIONS: SectionId[] = ["interview"];
@@ -342,6 +345,7 @@ export function SkillArea({
               <InterviewSection data={data} subAreaId={subArea} triggerAdd={addTrigger} />
             )}
             {activeSection === "resources" && <ResourcesSection data={data} subArea={subArea} />}
+            {activeSection === "services" && <ServicesSection data={data} subArea={subArea} />}
           </div>
         </div>
       </div>

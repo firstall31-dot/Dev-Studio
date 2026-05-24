@@ -35,14 +35,31 @@ export function InterviewSection({ data, subAreaId, triggerAdd }: Props) {
     }
   }, [triggerAdd]);
 
-  const filteredQs = useMemo(
-    () =>
-      interviewQuestions
-        .filter((q) => q.area === data.id)
-        .filter((q) => diff === "all" || q.difficulty === diff)
-        .filter((q) => !search || q.question.toLowerCase().includes(search.toLowerCase())),
-    [interviewQuestions, data.id, diff, search],
-  );
+  // Resolve subArea tags so we can filter questions by technology, not just area
+  const subAreaTags = useMemo(() => {
+    if (!subAreaId) return null;
+    const sa = data.subAreas?.find((s) => s.id === subAreaId);
+    return sa?.tags ?? null;
+  }, [data.subAreas, subAreaId]);
+
+  const filteredQs = useMemo(() => {
+    const byArea = interviewQuestions.filter((q) => q.area === data.id);
+
+    // When a specific subArea is selected and has tags, filter to matching questions.
+    // If no questions carry those tags, fall back to showing all area questions so
+    // the section is never unexpectedly empty.
+    let bySubArea = byArea;
+    if (subAreaTags && subAreaTags.length > 0) {
+      const tagged = byArea.filter((q) =>
+        q.tags?.some((t) => subAreaTags.includes(t.toLowerCase())),
+      );
+      bySubArea = tagged.length > 0 ? tagged : byArea;
+    }
+
+    return bySubArea
+      .filter((q) => diff === "all" || q.difficulty === diff)
+      .filter((q) => !search || q.question.toLowerCase().includes(search.toLowerCase()));
+  }, [interviewQuestions, data.id, subAreaTags, diff, search]);
 
   const { page, setPage, totalPages, paged, total, pageSize } = usePagination(filteredQs, 10);
 

@@ -66,6 +66,34 @@ export interface SkillChecklistItem {
   label: string;
 }
 
+export type ServiceCategory =
+  | "auth"
+  | "payment"
+  | "email"
+  | "cache"
+  | "queue"
+  | "storage"
+  | "realtime"
+  | "monitoring"
+  | "search";
+
+export interface ServiceSnippet {
+  lang: string;
+  install: string;
+  code: string;
+}
+
+export interface ServiceIntegration {
+  id: string;
+  name: string;
+  category: ServiceCategory;
+  description: string;
+  docsUrl: string;
+  packageName?: string;
+  badge?: "Popular" | "Official" | "Recommended";
+  snippet?: ServiceSnippet;
+}
+
 export interface SkillAreaData {
   id: AreaId;
   label: string;
@@ -85,5 +113,6 @@ export interface SkillAreaData {
     concepts?: SkillConcept[];
     resources?: SkillResource[];
     checklist?: SkillChecklistItem[];
+    services?: ServiceIntegration[];
   }[];
 }

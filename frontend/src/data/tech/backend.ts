@@ -1,5 +1,1343 @@
-import type { SkillAreaData } from "../../types/skills";
+import type { SkillAreaData, ServiceIntegration } from "../../types/skills";
 import { Server } from "lucide-react";
+
+const nodeServices: ServiceIntegration[] = [
+  {
+    id: "nd-passport",
+    name: "Passport.js",
+    category: "auth",
+    description: "Flexible authentication middleware for Node.js. Supports 500+ strategies including local, Google, GitHub, JWT, and more.",
+    docsUrl: "https://www.passportjs.org/docs/",
+    packageName: "passport passport-local passport-jwt",
+    badge: "Popular",
+    snippet: {
+      lang: "typescript",
+      install: "npm install passport passport-local passport-jwt jsonwebtoken",
+      code: `import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+
+// Local strategy (email + password)
+passport.use(new LocalStrategy({ usernameField: 'email' },
+  async (email, password, done) => {
+    const user = await User.findOne({ email });
+    if (!user || !await bcrypt.compare(password, user.hash))
+      return done(null, false, { message: 'Invalid credentials' });
+    return done(null, user);
+  }
+));
+
+// JWT strategy (Bearer token)
+passport.use(new JwtStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET!,
+}, async (payload, done) => {
+  const user = await User.findById(payload.sub);
+  return user ? done(null, user) : done(null, false);
+}));
+
+// Protect a route
+app.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
+  res.json(req.user);
+});`,
+    },
+  },
+  {
+    id: "nd-clerk",
+    name: "Clerk",
+    category: "auth",
+    description: "Drop-in auth with pre-built UI components. Handles users, sessions, MFA, social login, and organisations out of the box.",
+    docsUrl: "https://clerk.com/docs/quickstarts/express",
+    packageName: "@clerk/express",
+    badge: "Recommended",
+    snippet: {
+      lang: "typescript",
+      install: "npm install @clerk/express",
+      code: `import { clerkMiddleware, requireAuth, getAuth } from '@clerk/express';
+
+app.use(clerkMiddleware()); // injects auth state on every request
+
+// Protect a route
+app.get('/dashboard', requireAuth(), (req, res) => {
+  const { userId } = getAuth(req);
+  res.json({ userId });
+});
+
+// Webhook to sync users to your DB
+app.post('/webhooks/clerk', express.raw({ type: 'application/json' }), async (req, res) => {
+  const event = await verifyClerkWebhook(req);
+  if (event.type === 'user.created') {
+    await db.users.create({ clerkId: event.data.id, email: event.data.email_addresses[0].email_address });
+  }
+  res.json({ received: true });
+});`,
+    },
+  },
+  {
+    id: "nd-auth0",
+    name: "Auth0",
+    category: "auth",
+    description: "Enterprise-grade identity platform. Social login, SSO, MFA, anomaly detection, and compliance features built in.",
+    docsUrl: "https://auth0.com/docs/quickstart/backend/nodejs",
+    packageName: "express-openid-connect jwks-rsa",
+    snippet: {
+      lang: "typescript",
+      install: "npm install express-openid-connect jwks-rsa jsonwebtoken",
+      code: `import { auth, requiresAuth } from 'express-openid-connect';
+
+app.use(auth({
+  authRequired: false,
+  auth0Logout: true,
+  secret: process.env.AUTH0_SECRET,
+  baseURL: process.env.BASE_URL,
+  clientID: process.env.AUTH0_CLIENT_ID,
+  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
+}));
+
+// Protect routes
+app.get('/profile', requiresAuth(), (req, res) => {
+  res.json(req.oidc.user);
+});
+
+app.get('/', (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+});`,
+    },
+  },
+  {
+    id: "nd-stripe",
+    name: "Stripe",
+    category: "payment",
+    description: "Full-featured payments API. Subscriptions, one-time charges, invoices, Connect marketplace payments, and webhook handling.",
+    docsUrl: "https://stripe.com/docs/api?lang=node",
+    packageName: "stripe",
+    badge: "Popular",
+    snippet: {
+      lang: "typescript",
+      install: "npm install stripe",
+      code: `import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+// Create a checkout session
+app.post('/create-checkout', async (req, res) => {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{ price: req.body.priceId, quantity: 1 }],
+    mode: 'subscription',
+    success_url: \`\${process.env.FRONTEND_URL}/success?session={CHECKOUT_SESSION_ID}\`,
+    cancel_url: \`\${process.env.FRONTEND_URL}/cancel\`,
+  });
+  res.json({ url: session.url });
+});
+
+// Webhook — verify signature before trusting payload
+app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), (req, res) => {
+  const event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature']!, process.env.STRIPE_WEBHOOK_SECRET!);
+  if (event.type === 'customer.subscription.updated') { /* handle */ }
+  res.json({ received: true });
+});`,
+    },
+  },
+  {
+    id: "nd-resend",
+    name: "Resend",
+    category: "email",
+    description: "Developer-first transactional email API. React email templates, open/click tracking, and high deliverability.",
+    docsUrl: "https://resend.com/docs/send-with-nodejs",
+    packageName: "resend",
+    badge: "Recommended",
+    snippet: {
+      lang: "typescript",
+      install: "npm install resend",
+      code: `import { Resend } from 'resend';
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Send a transactional email
+await resend.emails.send({
+  from: 'no-reply@yourdomain.com',
+  to: user.email,
+  subject: 'Welcome to the app!',
+  html: '<h1>Welcome!</h1><p>Thanks for signing up.</p>',
+});
+
+// With React Email template
+import { render } from '@react-email/render';
+import WelcomeEmail from './emails/welcome';
+
+const html = render(<WelcomeEmail username={user.name} />);
+await resend.emails.send({ from, to, subject, html });`,
+    },
+  },
+  {
+    id: "nd-nodemailer",
+    name: "Nodemailer",
+    category: "email",
+    description: "The classic Node.js SMTP email library. Works with Gmail, Outlook, Mailgun, SendGrid SMTP, and any SMTP server.",
+    docsUrl: "https://nodemailer.com/about/",
+    packageName: "nodemailer @types/nodemailer",
+    badge: "Popular",
+    snippet: {
+      lang: "typescript",
+      install: "npm install nodemailer",
+      code: `import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: 587,
+  secure: false,
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+});
+
+await transporter.sendMail({
+  from: '"My App" <no-reply@myapp.com>',
+  to: 'user@example.com',
+  subject: 'Password Reset',
+  html: '<p>Click <a href="...">here</a> to reset your password.</p>',
+});`,
+    },
+  },
+  {
+    id: "nd-bullmq",
+    name: "BullMQ",
+    category: "queue",
+    description: "Production-ready job queue backed by Redis. Delayed jobs, retries, priority, rate limiting, and real-time dashboard.",
+    docsUrl: "https://docs.bullmq.io/",
+    packageName: "bullmq ioredis",
+    badge: "Recommended",
+    snippet: {
+      lang: "typescript",
+      install: "npm install bullmq ioredis",
+      code: `import { Queue, Worker } from 'bullmq';
+import Redis from 'ioredis';
+
+const connection = new Redis(process.env.REDIS_URL!);
+
+// Producer — add jobs from your API routes
+const emailQueue = new Queue('emails', { connection });
+
+app.post('/register', async (req, res) => {
+  const user = await createUser(req.body);
+  await emailQueue.add('welcome', { userId: user.id, email: user.email }, {
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 2000 },
+  });
+  res.json({ user });
+});
+
+// Worker — process in a separate process
+new Worker('emails', async (job) => {
+  if (job.name === 'welcome') {
+    await sendWelcomeEmail(job.data.email);
+  }
+}, { connection });`,
+    },
+  },
+  {
+    id: "nd-redis",
+    name: "ioredis (Cache)",
+    category: "cache",
+    description: "Robust Redis client for Node.js. Caching, sessions, pub/sub, rate limiting, and distributed locks.",
+    docsUrl: "https://github.com/redis/ioredis",
+    packageName: "ioredis",
+    badge: "Popular",
+    snippet: {
+      lang: "typescript",
+      install: "npm install ioredis",
+      code: `import Redis from 'ioredis';
+const redis = new Redis(process.env.REDIS_URL!);
+
+// Cache-aside pattern
+async function getCachedUser(userId: string) {
+  const cached = await redis.get(\`user:\${userId}\`);
+  if (cached) return JSON.parse(cached);
+
+  const user = await db.users.findById(userId);
+  await redis.setex(\`user:\${userId}\`, 300, JSON.stringify(user)); // TTL 5 min
+  return user;
+}
+
+// Rate limiting
+async function checkRateLimit(ip: string) {
+  const key = \`rl:\${ip}\`;
+  const count = await redis.incr(key);
+  if (count === 1) await redis.expire(key, 60); // 1-min window
+  return count <= 100; // 100 req/min
+}`,
+    },
+  },
+  {
+    id: "nd-s3",
+    name: "AWS S3 / Cloudflare R2",
+    category: "storage",
+    description: "Object storage for user uploads, media, and files. Use aws-sdk v3 — works with S3-compatible providers like R2 and MinIO.",
+    docsUrl: "https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/",
+    packageName: "@aws-sdk/client-s3 @aws-sdk/s3-request-presigner",
+    snippet: {
+      lang: "typescript",
+      install: "npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner multer",
+      code: `import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID!, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY! },
+});
+
+// Generate a presigned upload URL (client uploads directly to S3)
+app.post('/uploads/presign', requireAuth(), async (req, res) => {
+  const key = \`uploads/\${req.user.id}/\${Date.now()}-\${req.body.filename}\`;
+  const url = await getSignedUrl(s3, new PutObjectCommand({
+    Bucket: process.env.S3_BUCKET!, Key: key, ContentType: req.body.contentType,
+  }), { expiresIn: 300 });
+  res.json({ url, key });
+});`,
+    },
+  },
+  {
+    id: "nd-socketio",
+    name: "Socket.io",
+    category: "realtime",
+    description: "Bidirectional, event-based real-time communication. Rooms, namespaces, auto-reconnect, and Redis adapter for multi-server scaling.",
+    docsUrl: "https://socket.io/docs/v4/",
+    packageName: "socket.io",
+    badge: "Popular",
+    snippet: {
+      lang: "typescript",
+      install: "npm install socket.io",
+      code: `import { createServer } from 'http';
+import { Server } from 'socket.io';
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: process.env.FRONTEND_URL, credentials: true },
+});
+
+io.use((socket, next) => {
+  // Auth middleware — verify JWT from handshake
+  const token = socket.handshake.auth.token;
+  try {
+    socket.data.user = jwt.verify(token, process.env.JWT_SECRET!);
+    next();
+  } catch { next(new Error('Unauthorized')); }
+});
+
+io.on('connection', (socket) => {
+  socket.join(\`user:\${socket.data.user.id}\`);
+
+  socket.on('message:send', async (data) => {
+    const msg = await saveMessage(data);
+    io.to(\`room:\${data.roomId}\`).emit('message:new', msg);
+  });
+});
+
+// Send to a user from a REST route
+app.post('/notify', (req, res) => {
+  io.to(\`user:\${req.body.userId}\`).emit('notification', req.body.payload);
+  res.json({ ok: true });
+});`,
+    },
+  },
+];
+
+const aspnetServices: ServiceIntegration[] = [
+  {
+    id: "as-identity",
+    name: "ASP.NET Identity",
+    category: "auth",
+    description: "Microsoft's built-in membership system. User management, roles, claims, password hashing, and email confirmation out of the box.",
+    docsUrl: "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity",
+    packageName: "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+    badge: "Official",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+      code: `// Program.cs
+builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+    options.Password.RequiredLength = 8;
+    options.SignIn.RequireConfirmedEmail = true;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters {
+            ValidateIssuer = true, ValidateAudience = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+
+// In a controller
+[HttpPost("login")]
+public async Task<IActionResult> Login([FromBody] LoginDto dto) {
+    var user = await _userManager.FindByEmailAsync(dto.Email);
+    if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+        return Unauthorized();
+    var token = GenerateJwtToken(user);
+    return Ok(new { token });
+}`,
+    },
+  },
+  {
+    id: "as-duende",
+    name: "Duende IdentityServer",
+    category: "auth",
+    description: "OpenID Connect and OAuth 2.0 framework for ASP.NET Core. SSO, API protection, token management, and BFF pattern.",
+    docsUrl: "https://docs.duendesoftware.com/identityserver/v7",
+    packageName: "Duende.IdentityServer",
+    badge: "Recommended",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package Duende.IdentityServer",
+      code: `// Program.cs — minimal IdentityServer setup
+builder.Services.AddIdentityServer(options => {
+    options.Events.RaiseErrorEvents = true;
+    options.Events.RaiseSuccessEvents = true;
+})
+.AddInMemoryClients(Config.Clients)
+.AddInMemoryApiScopes(Config.ApiScopes)
+.AddInMemoryIdentityResources(Config.IdentityResources)
+.AddAspNetIdentity<ApplicationUser>();
+
+// Config.cs
+public static IEnumerable<Client> Clients => new[] {
+    new Client {
+        ClientId = "spa",
+        AllowedGrantTypes = GrantTypes.Code,
+        RedirectUris = { "https://app.example.com/callback" },
+        AllowedScopes = { "openid", "profile", "api" },
+        RequirePkce = true,
+        RequireClientSecret = false,
+    }
+};`,
+    },
+  },
+  {
+    id: "as-stripe",
+    name: "Stripe.NET",
+    category: "payment",
+    description: "Official Stripe SDK for .NET. Strongly-typed API for charges, subscriptions, invoices, and webhook processing.",
+    docsUrl: "https://stripe.com/docs/api?lang=dotnet",
+    packageName: "Stripe.net",
+    badge: "Popular",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package Stripe.net",
+      code: `// Program.cs
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+// Create checkout session
+[HttpPost("create-checkout")]
+public async Task<IActionResult> CreateCheckout([FromBody] CheckoutDto dto) {
+    var options = new SessionCreateOptions {
+        PaymentMethodTypes = new List<string> { "card" },
+        LineItems = new List<SessionLineItemOptions> {
+            new() { Price = dto.PriceId, Quantity = 1 }
+        },
+        Mode = "subscription",
+        SuccessUrl = $"{_config["FrontendUrl"]}/success",
+        CancelUrl = $"{_config["FrontendUrl"]}/cancel",
+    };
+    var service = new SessionService();
+    var session = await service.CreateAsync(options);
+    return Ok(new { url = session.Url });
+}
+
+// Webhook
+[HttpPost("webhooks/stripe")]
+public async Task<IActionResult> StripeWebhook() {
+    var json = await new StreamReader(Request.Body).ReadToEndAsync();
+    var stripeEvent = EventUtility.ConstructEvent(json,
+        Request.Headers["Stripe-Signature"], _config["Stripe:WebhookSecret"]);
+    if (stripeEvent.Type == "customer.subscription.updated") { /* handle */ }
+    return Ok();
+}`,
+    },
+  },
+  {
+    id: "as-mailkit",
+    name: "MailKit",
+    category: "email",
+    description: "The go-to SMTP/IMAP client for .NET. Supports SMTP, DKIM signing, HTML emails, and is fully async.",
+    docsUrl: "https://github.com/jstedfast/MailKit",
+    packageName: "MailKit",
+    badge: "Popular",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package MailKit MimeKit",
+      code: `using MimeKit;
+using MailKit.Net.Smtp;
+
+public class EmailService {
+    public async Task SendAsync(string to, string subject, string htmlBody) {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("My App", "no-reply@myapp.com"));
+        message.To.Add(MailboxAddress.Parse(to));
+        message.Subject = subject;
+        message.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(_config["Smtp:Host"], 587, SecureSocketOptions.StartTls);
+        await client.AuthenticateAsync(_config["Smtp:User"], _config["Smtp:Pass"]);
+        await client.SendAsync(message);
+        await client.DisconnectAsync(true);
+    }
+}`,
+    },
+  },
+  {
+    id: "as-redis",
+    name: "StackExchange.Redis",
+    category: "cache",
+    description: "High-performance Redis client for .NET. Distributed caching, sessions, pub/sub, and IDistributedCache integration.",
+    docsUrl: "https://stackexchange.github.io/StackExchange.Redis/",
+    packageName: "StackExchange.Redis Microsoft.Extensions.Caching.StackExchangeRedis",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package StackExchange.Redis Microsoft.Extensions.Caching.StackExchangeRedis",
+      code: `// Program.cs — adds IDistributedCache backed by Redis
+builder.Services.AddStackExchangeRedisCache(options => {
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "myapp:";
+});
+
+// Usage via IDistributedCache
+public class UserService(IDistributedCache cache) {
+    public async Task<User?> GetUserAsync(string id) {
+        var cached = await cache.GetStringAsync($"user:{id}");
+        if (cached != null) return JsonSerializer.Deserialize<User>(cached);
+
+        var user = await _db.Users.FindAsync(id);
+        if (user != null) await cache.SetStringAsync($"user:{id}",
+            JsonSerializer.Serialize(user),
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+        return user;
+    }
+}`,
+    },
+  },
+  {
+    id: "as-hangfire",
+    name: "Hangfire",
+    category: "queue",
+    description: "Background job processing for .NET. Fire-and-forget, delayed, recurring, and continuations. Dashboard included.",
+    docsUrl: "https://docs.hangfire.io/en/latest/",
+    packageName: "Hangfire.Core Hangfire.SqlServer",
+    badge: "Popular",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package Hangfire.Core Hangfire.SqlServer Hangfire.AspNetCore",
+      code: `// Program.cs
+builder.Services.AddHangfire(cfg => cfg
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(connectionString));
+builder.Services.AddHangfireServer();
+
+app.UseHangfireDashboard("/hangfire"); // protect this in prod!
+
+// Enqueue a fire-and-forget job
+BackgroundJob.Enqueue<IEmailService>(s => s.SendWelcomeEmailAsync(userId));
+
+// Recurring job (cron)
+RecurringJob.AddOrUpdate<IReportService>("daily-report",
+    s => s.GenerateDailyReportAsync(), Cron.Daily);`,
+    },
+  },
+  {
+    id: "as-azure-blob",
+    name: "Azure Blob Storage",
+    category: "storage",
+    description: "Microsoft's object storage for unstructured data. SDKs for upload, download, SAS tokens, and lifecycle management.",
+    docsUrl: "https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction",
+    packageName: "Azure.Storage.Blobs",
+    snippet: {
+      lang: "csharp",
+      install: "dotnet add package Azure.Storage.Blobs",
+      code: `using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
+
+public class BlobStorageService(IConfiguration config) {
+    private readonly BlobServiceClient _client = new(config["Azure:StorageConnection"]);
+
+    public async Task<string> UploadAsync(Stream fileStream, string containerName, string blobName) {
+        var container = _client.GetBlobContainerClient(containerName);
+        await container.CreateIfNotExistsAsync();
+        var blob = container.GetBlobClient(blobName);
+        await blob.UploadAsync(fileStream, overwrite: true);
+        return blob.Uri.ToString();
+    }
+
+    public Uri GenerateSasUrl(string containerName, string blobName, int expiryMinutes = 60) {
+        var blob = _client.GetBlobContainerClient(containerName).GetBlobClient(blobName);
+        return blob.GenerateSasUri(BlobSasPermissions.Read,
+            DateTimeOffset.UtcNow.AddMinutes(expiryMinutes));
+    }
+}`,
+    },
+  },
+  {
+    id: "as-signalr",
+    name: "SignalR",
+    category: "realtime",
+    description: "Real-time web functionality for ASP.NET Core. WebSockets with automatic fallback, hubs, groups, and Azure SignalR Service for scaling.",
+    docsUrl: "https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction",
+    packageName: "Microsoft.AspNetCore.SignalR",
+    badge: "Official",
+    snippet: {
+      lang: "csharp",
+      install: "# Built into ASP.NET Core — no extra package needed",
+      code: `// Define a Hub
+public class ChatHub : Hub {
+    public async Task SendMessage(string roomId, string message) {
+        var msg = new { User = Context.User?.Identity?.Name, Text = message, Time = DateTime.UtcNow };
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", msg);
+    }
+    public async Task JoinRoom(string roomId) => await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+}
+
+// Program.cs
+builder.Services.AddSignalR();
+app.MapHub<ChatHub>("/hubs/chat");
+
+// Send from a controller/service
+public class NotificationService(IHubContext<ChatHub> hub) {
+    public async Task NotifyUserAsync(string userId, object payload) =>
+        await hub.Clients.User(userId).SendAsync("Notification", payload);
+}`,
+    },
+  },
+];
+
+const phpServices: ServiceIntegration[] = [
+  {
+    id: "ph-sanctum",
+    name: "Laravel Sanctum",
+    category: "auth",
+    description: "Lightweight API token authentication for SPAs and mobile apps. Cookie-based sessions for SPAs, token-based for APIs.",
+    docsUrl: "https://laravel.com/docs/sanctum",
+    packageName: "laravel/sanctum",
+    badge: "Official",
+    snippet: {
+      lang: "php",
+      install: "composer require laravel/sanctum && php artisan vendor:publish --provider=\"Laravel\\Sanctum\\SanctumServiceProvider\"",
+      code: `// User model
+use Laravel\\Sanctum\\HasApiTokens;
+
+class User extends Authenticatable {
+    use HasApiTokens, HasFactory, Notifiable;
+}
+
+// routes/api.php
+Route::post('/login', function (Request $request) {
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+    $token = Auth::user()->createToken('api-token', ['read', 'write']);
+    return response()->json(['token' => $token->plainTextToken]);
+});
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::middleware('auth:sanctum')->delete('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+    return response()->json(['message' => 'Logged out']);
+});`,
+    },
+  },
+  {
+    id: "ph-passport",
+    name: "Laravel Passport",
+    category: "auth",
+    description: "Full OAuth2 server for Laravel. Authorization codes, client credentials, password grant, and personal access tokens.",
+    docsUrl: "https://laravel.com/docs/passport",
+    packageName: "laravel/passport",
+    snippet: {
+      lang: "php",
+      install: "composer require laravel/passport && php artisan passport:install",
+      code: `// User model
+use Laravel\\Passport\\HasApiTokens;
+
+class User extends Authenticatable {
+    use HasApiTokens;
+}
+
+// config/auth.php — set guard driver to 'passport'
+'api' => ['driver' => 'passport', 'provider' => 'users'],
+
+// Issue a personal token (e.g. for testing)
+$token = $user->createToken('Personal Access Token')->accessToken;
+
+// Client Credentials grant (machine-to-machine)
+// POST /oauth/token with grant_type=client_credentials
+// Protect routes: middleware('client')`,
+    },
+  },
+  {
+    id: "ph-cashier",
+    name: "Laravel Cashier (Stripe)",
+    category: "payment",
+    description: "Expressive billing interface for Stripe. Subscriptions, invoices, proration, trial periods, and coupon handling.",
+    docsUrl: "https://laravel.com/docs/billing",
+    packageName: "laravel/cashier",
+    badge: "Official",
+    snippet: {
+      lang: "php",
+      install: "composer require laravel/cashier && php artisan migrate",
+      code: `// User model
+use Laravel\\Cashier\\Billable;
+
+class User extends Authenticatable {
+    use Billable;
+}
+
+// Subscribe a user
+$user->newSubscription('default', 'price_monthly')
+     ->trialDays(14)
+     ->create($paymentMethodId);
+
+// Check subscription status
+if ($user->subscribed('default')) { /* access granted */ }
+if ($user->subscription('default')->onTrial()) { /* on trial */ }
+
+// One-time charge
+$user->charge(1999, $paymentMethodId); // $19.99
+
+// Generate billing portal URL
+$url = $user->billingPortalUrl(route('dashboard'));
+return redirect($url);`,
+    },
+  },
+  {
+    id: "ph-mail",
+    name: "Laravel Mail",
+    category: "email",
+    description: "Elegant email API with Mailable classes. Works with SMTP, Mailgun, Postmark, SES, Resend, and more drivers.",
+    docsUrl: "https://laravel.com/docs/mail",
+    packageName: "Built-in",
+    badge: "Official",
+    snippet: {
+      lang: "php",
+      install: "# Built into Laravel — configure .env: MAIL_MAILER=resend RESEND_API_KEY=...",
+      code: `// Create a Mailable
+// php artisan make:mail WelcomeMail
+
+class WelcomeMail extends Mailable {
+    use Queueable, SerializesModels;
+
+    public function __construct(public User $user) {}
+
+    public function envelope(): Envelope {
+        return new Envelope(subject: 'Welcome to the App!');
+    }
+
+    public function content(): Content {
+        return new Content(view: 'emails.welcome'); // resources/views/emails/welcome.blade.php
+    }
+}
+
+// Send immediately
+Mail::to($user->email)->send(new WelcomeMail($user));
+
+// Send via queue (recommended for production)
+Mail::to($user->email)->queue(new WelcomeMail($user));`,
+    },
+  },
+  {
+    id: "ph-horizon",
+    name: "Laravel Horizon",
+    category: "queue",
+    description: "Beautiful dashboard and configuration for Redis queues. Monitors jobs, failures, throughput, and runtime — all in real time.",
+    docsUrl: "https://laravel.com/docs/horizon",
+    packageName: "laravel/horizon",
+    badge: "Recommended",
+    snippet: {
+      lang: "php",
+      install: "composer require laravel/horizon && php artisan horizon:install",
+      code: `// Create a Job
+// php artisan make:job ProcessOrder
+
+class ProcessOrder implements ShouldQueue {
+    use Queueable;
+
+    public function __construct(public Order $order) {}
+
+    public function handle(PaymentService $payments): void {
+        $payments->charge($this->order);
+        $this->order->update(['status' => 'processed']);
+    }
+
+    public function failed(Throwable $e): void {
+        // Notify team or log failure
+        Log::error('Order processing failed', ['order' => $this->order->id, 'error' => $e->getMessage()]);
+    }
+}
+
+// Dispatch from controller
+ProcessOrder::dispatch($order)->onQueue('orders');
+
+// Start Horizon (replaces php artisan queue:work in production)
+// php artisan horizon`,
+    },
+  },
+  {
+    id: "ph-spatie",
+    name: "Spatie Permission",
+    category: "auth",
+    description: "Role and permission management for Laravel. Assign roles/permissions to users, use gates, and cache for performance.",
+    docsUrl: "https://spatie.be/docs/laravel-permission",
+    packageName: "spatie/laravel-permission",
+    badge: "Popular",
+    snippet: {
+      lang: "php",
+      install: "composer require spatie/laravel-permission && php artisan migrate",
+      code: `// User model
+use Spatie\\Permission\\Traits\\HasRoles;
+
+class User extends Authenticatable {
+    use HasRoles;
+}
+
+// Create roles and permissions
+Role::create(['name' => 'admin']);
+Permission::create(['name' => 'publish articles']);
+
+// Assign to user
+$user->assignRole('admin');
+$user->givePermissionTo('publish articles');
+
+// Check in code
+if ($user->hasRole('admin')) { /* ... */ }
+if ($user->can('publish articles')) { /* ... */ }
+
+// Protect routes
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('admin/posts', AdminPostController::class);
+});`,
+    },
+  },
+  {
+    id: "ph-redis",
+    name: "Laravel Cache (Redis)",
+    category: "cache",
+    description: "Laravel's unified cache layer with Redis driver. Tags, TTL, atomic locks, and cache busting built in.",
+    docsUrl: "https://laravel.com/docs/cache",
+    packageName: "predis/predis",
+    snippet: {
+      lang: "php",
+      install: "composer require predis/predis # and set CACHE_DRIVER=redis in .env",
+      code: `// Remember pattern — fetch or store
+$user = Cache::remember("user:{$id}", now()->addMinutes(5), fn() => User::find($id));
+
+// Store with tags (allows group invalidation)
+Cache::tags(['users', "user:{$id}"])->put("user:{$id}:profile", $profile, 300);
+Cache::tags(['users'])->flush(); // invalidate all user caches
+
+// Atomic lock — prevent race conditions
+$lock = Cache::lock('payment:' . $orderId, 10); // 10s TTL
+if ($lock->get()) {
+    try { processPayment($order); }
+    finally { $lock->release(); }
+}
+
+// Rate limiting
+if (RateLimiter::tooManyAttempts("login:{$ip}", 5)) {
+    return response()->json(['error' => 'Too many attempts'], 429);
+}
+RateLimiter::hit("login:{$ip}", 60);`,
+    },
+  },
+  {
+    id: "ph-s3",
+    name: "Laravel Storage (S3)",
+    category: "storage",
+    description: "Laravel's filesystem abstraction. Local, S3, DigitalOcean Spaces, and any Flysystem adapter — same API for all.",
+    docsUrl: "https://laravel.com/docs/filesystem",
+    packageName: "league/flysystem-aws-s3-v3",
+    snippet: {
+      lang: "php",
+      install: "composer require league/flysystem-aws-s3-v3",
+      code: `// .env: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_BUCKET
+
+// Store file
+$path = Storage::disk('s3')->put('uploads', $request->file('avatar'));
+
+// Store with custom name
+$path = Storage::disk('s3')->putFileAs('avatars', $file, "{$user->id}.jpg");
+
+// Generate temporary URL
+$url = Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(30));
+
+// Controller example
+public function upload(Request $request) {
+    $request->validate(['file' => 'required|file|max:10240']);
+    $path = Storage::disk('s3')->put('uploads/' . Auth::id(), $request->file('file'));
+    return response()->json(['path' => $path, 'url' => Storage::disk('s3')->url($path)]);
+}`,
+    },
+  },
+];
+
+const pythonServices: ServiceIntegration[] = [
+  {
+    id: "py-fastapi-auth",
+    name: "FastAPI OAuth2 + JWT",
+    category: "auth",
+    description: "FastAPI's built-in OAuth2 password flow with JWT tokens. Dependency-injected current user, token refresh, and scopes.",
+    docsUrl: "https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/",
+    packageName: "python-jose[cryptography] passlib[bcrypt]",
+    badge: "Official",
+    snippet: {
+      lang: "python",
+      install: "pip install python-jose[cryptography] passlib[bcrypt] python-multipart",
+      code: `from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+
+def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=30)):
+    payload = {**data, "exp": datetime.utcnow() + expires_delta}
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=["HS256"])
+        user = await db.get(User, payload["sub"])
+        if not user: raise HTTPException(status_code=401, detail="User not found")
+        return user
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+@router.post("/token")
+async def login(form: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    user = await authenticate_user(db, form.username, form.password)
+    if not user: raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"access_token": create_access_token({"sub": str(user.id)}), "token_type": "bearer"}`,
+    },
+  },
+  {
+    id: "py-stripe",
+    name: "stripe-python",
+    category: "payment",
+    description: "Official Stripe SDK for Python. Subscriptions, one-time charges, webhooks, and async support with httpx.",
+    docsUrl: "https://stripe.com/docs/api?lang=python",
+    packageName: "stripe",
+    snippet: {
+      lang: "python",
+      install: "pip install stripe",
+      code: `import stripe
+from fastapi import APIRouter, Request, Header
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+router = APIRouter()
+
+@router.post("/create-checkout")
+async def create_checkout(price_id: str, current_user: User = Depends(get_current_user)):
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{"price": price_id, "quantity": 1}],
+        mode="subscription",
+        success_url=f"{settings.FRONTEND_URL}/success",
+        cancel_url=f"{settings.FRONTEND_URL}/cancel",
+        customer_email=current_user.email,
+    )
+    return {"url": session.url}
+
+@router.post("/webhooks/stripe")
+async def stripe_webhook(request: Request, stripe_signature: str = Header(None)):
+    payload = await request.body()
+    event = stripe.Webhook.construct_event(payload, stripe_signature, settings.STRIPE_WEBHOOK_SECRET)
+    if event["type"] == "customer.subscription.updated":
+        await handle_subscription_update(event["data"]["object"])
+    return {"received": True}`,
+    },
+  },
+  {
+    id: "py-fastapi-mail",
+    name: "fastapi-mail",
+    category: "email",
+    description: "Async email sending for FastAPI with Jinja2 templates. SMTP, STARTTLS, background tasks, and HTML/text multipart.",
+    docsUrl: "https://sabuhish.github.io/fastapi-mail/",
+    packageName: "fastapi-mail",
+    snippet: {
+      lang: "python",
+      install: "pip install fastapi-mail aiosmtplib",
+      code: `from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+
+conf = ConnectionConfig(
+    MAIL_USERNAME=settings.SMTP_USER,
+    MAIL_PASSWORD=settings.SMTP_PASS,
+    MAIL_FROM="no-reply@myapp.com",
+    MAIL_PORT=587,
+    MAIL_SERVER=settings.SMTP_HOST,
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+)
+
+fm = FastMail(conf)
+
+@router.post("/send-welcome")
+async def send_welcome(user: User = Depends(get_current_user), background_tasks: BackgroundTasks = BackgroundTasks()):
+    message = MessageSchema(
+        subject="Welcome!",
+        recipients=[user.email],
+        body=f"<h1>Hi {user.name}, welcome aboard!</h1>",
+        subtype="html",
+    )
+    background_tasks.add_task(fm.send_message, message)
+    return {"message": "Email queued"}`,
+    },
+  },
+  {
+    id: "py-redis",
+    name: "redis-py / aioredis",
+    category: "cache",
+    description: "Async Redis client for Python. Caching, pub/sub, rate limiting with async/await support built in.",
+    docsUrl: "https://redis-py.readthedocs.io/en/stable/",
+    packageName: "redis[asyncio]",
+    snippet: {
+      lang: "python",
+      install: "pip install redis[asyncio]",
+      code: `import redis.asyncio as redis
+import json
+
+redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
+
+# Cache-aside pattern
+async def get_user(user_id: str, db: AsyncSession) -> User:
+    cached = await redis_client.get(f"user:{user_id}")
+    if cached:
+        return User(**json.loads(cached))
+
+    user = await db.get(User, user_id)
+    if user:
+        await redis_client.setex(f"user:{user_id}", 300, json.dumps(user.dict()))
+    return user
+
+# Rate limiter dependency
+async def rate_limit(request: Request):
+    key = f"rl:{request.client.host}"
+    count = await redis_client.incr(key)
+    if count == 1:
+        await redis_client.expire(key, 60)
+    if count > 100:
+        raise HTTPException(status_code=429, detail="Too many requests")`,
+    },
+  },
+  {
+    id: "py-celery",
+    name: "Celery + Redis",
+    category: "queue",
+    description: "Distributed task queue for Python. Async tasks, periodic jobs (beat), retries, and result backends.",
+    docsUrl: "https://docs.celeryq.dev/en/stable/",
+    packageName: "celery redis",
+    badge: "Popular",
+    snippet: {
+      lang: "python",
+      install: "pip install celery[redis]",
+      code: `# celery_app.py
+from celery import Celery
+
+celery_app = Celery("myapp", broker=settings.REDIS_URL, backend=settings.REDIS_URL)
+celery_app.conf.update(task_serializer="json", accept_content=["json"])
+
+# tasks.py
+from celery_app import celery_app
+
+@celery_app.task(bind=True, max_retries=3, default_retry_delay=60)
+def send_welcome_email(self, user_id: str):
+    try:
+        user = User.objects.get(id=user_id)
+        email_service.send(user.email, "Welcome!")
+    except Exception as exc:
+        raise self.retry(exc=exc)
+
+# In FastAPI route — enqueue from request handler
+@router.post("/register")
+async def register(data: RegisterSchema, db: AsyncSession = Depends(get_db)):
+    user = await create_user(db, data)
+    send_welcome_email.delay(str(user.id))  # non-blocking
+    return user`,
+    },
+  },
+  {
+    id: "py-s3",
+    name: "boto3 / S3",
+    category: "storage",
+    description: "AWS SDK for Python. S3 uploads, presigned URLs, multipart, and compatible with R2, MinIO, and DigitalOcean Spaces.",
+    docsUrl: "https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html",
+    packageName: "boto3",
+    snippet: {
+      lang: "python",
+      install: "pip install boto3",
+      code: `import boto3
+from botocore.exceptions import ClientError
+
+s3 = boto3.client("s3",
+    region_name=settings.AWS_REGION,
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+)
+
+# Generate presigned upload URL (client uploads directly to S3)
+@router.post("/uploads/presign")
+async def presign_upload(filename: str, content_type: str, user: User = Depends(get_current_user)):
+    key = f"uploads/{user.id}/{filename}"
+    url = s3.generate_presigned_url("put_object",
+        Params={"Bucket": settings.S3_BUCKET, "Key": key, "ContentType": content_type},
+        ExpiresIn=300)
+    return {"url": url, "key": key}
+
+# Direct upload (small files)
+@router.post("/uploads")
+async def upload_file(file: UploadFile, user: User = Depends(get_current_user)):
+    key = f"uploads/{user.id}/{file.filename}"
+    s3.upload_fileobj(file.file, settings.S3_BUCKET, key)
+    return {"key": key}`,
+    },
+  },
+];
+
+const goServices: ServiceIntegration[] = [
+  {
+    id: "go-jwt",
+    name: "golang-jwt",
+    category: "auth",
+    description: "Widely-used Go JWT library. Sign, parse, and validate JWT tokens with HMAC, RSA, and ECDSA algorithms.",
+    docsUrl: "https://github.com/golang-jwt/jwt",
+    packageName: "github.com/golang-jwt/jwt/v5",
+    badge: "Popular",
+    snippet: {
+      lang: "go",
+      install: "go get github.com/golang-jwt/jwt/v5",
+      code: `package auth
+
+import (
+    "github.com/golang-jwt/jwt/v5"
+    "net/http"
+    "strings"
+    "time"
+)
+
+type Claims struct {
+    UserID string \`json:"sub"\`
+    jwt.RegisteredClaims
+}
+
+func CreateToken(userID string, secret []byte) (string, error) {
+    claims := Claims{
+        UserID: userID,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+            IssuedAt:  jwt.NewNumericDate(time.Now()),
+        },
+    }
+    return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret)
+}
+
+// Middleware — extract and validate JWT from Authorization header
+func JWTMiddleware(secret []byte, next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+        claims := &Claims{}
+        if _, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
+            return secret, nil
+        }); err != nil {
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+        ctx := context.WithValue(r.Context(), "userID", claims.UserID)
+        next.ServeHTTP(w, r.WithContext(ctx))
+    })
+}`,
+    },
+  },
+  {
+    id: "go-stripe",
+    name: "stripe-go",
+    category: "payment",
+    description: "Official Stripe SDK for Go. Full API coverage with strong types, pagination iterators, and webhook verification.",
+    docsUrl: "https://stripe.com/docs/api?lang=go",
+    packageName: "github.com/stripe/stripe-go/v79",
+    snippet: {
+      lang: "go",
+      install: "go get github.com/stripe/stripe-go/v79",
+      code: `import (
+    "github.com/stripe/stripe-go/v79"
+    "github.com/stripe/stripe-go/v79/checkout/session"
+    "github.com/stripe/stripe-go/v79/webhook"
+)
+
+func init() { stripe.Key = os.Getenv("STRIPE_SECRET_KEY") }
+
+func CreateCheckoutSession(priceID, email string) (*stripe.CheckoutSession, error) {
+    params := &stripe.CheckoutSessionParams{
+        PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
+        LineItems: []*stripe.CheckoutSessionLineItemParams{
+            {Price: stripe.String(priceID), Quantity: stripe.Int64(1)},
+        },
+        Mode:          stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+        SuccessURL:    stripe.String(os.Getenv("FRONTEND_URL") + "/success"),
+        CancelURL:     stripe.String(os.Getenv("FRONTEND_URL") + "/cancel"),
+        CustomerEmail: stripe.String(email),
+    }
+    return session.New(params)
+}
+
+func HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
+    payload, _ := io.ReadAll(r.Body)
+    event, err := webhook.ConstructEvent(payload, r.Header.Get("Stripe-Signature"), os.Getenv("STRIPE_WEBHOOK_SECRET"))
+    if err != nil { w.WriteHeader(http.StatusBadRequest); return }
+    if event.Type == "customer.subscription.updated" { /* handle */ }
+    w.WriteHeader(http.StatusOK)
+}`,
+    },
+  },
+  {
+    id: "go-mail",
+    name: "gomail",
+    category: "email",
+    description: "Simple and efficient email library for Go. SMTP, HTML/text, attachments, and headers — no extra dependencies.",
+    docsUrl: "https://github.com/go-gomail/gomail",
+    packageName: "gopkg.in/gomail.v2",
+    snippet: {
+      lang: "go",
+      install: "go get gopkg.in/gomail.v2",
+      code: `import (
+    "gopkg.in/gomail.v2"
+    "crypto/tls"
+)
+
+type Mailer struct { dialer *gomail.Dialer }
+
+func NewMailer(host string, port int, user, pass string) *Mailer {
+    d := gomail.NewDialer(host, port, user, pass)
+    d.TLSConfig = &tls.Config{InsecureSkipVerify: false}
+    return &Mailer{dialer: d}
+}
+
+func (m *Mailer) Send(to, subject, htmlBody string) error {
+    msg := gomail.NewMessage()
+    msg.SetHeader("From", "no-reply@myapp.com")
+    msg.SetHeader("To", to)
+    msg.SetHeader("Subject", subject)
+    msg.SetBody("text/html", htmlBody)
+    return m.dialer.DialAndSend(msg)
+}`,
+    },
+  },
+  {
+    id: "go-redis",
+    name: "go-redis",
+    category: "cache",
+    description: "Type-safe Redis client for Go. Pipelining, pub/sub, Cluster, Sentinel, and full context support.",
+    docsUrl: "https://redis.uptrace.dev/",
+    packageName: "github.com/redis/go-redis/v9",
+    badge: "Popular",
+    snippet: {
+      lang: "go",
+      install: "go get github.com/redis/go-redis/v9",
+      code: `import "github.com/redis/go-redis/v9"
+
+var rdb = redis.NewClient(&redis.Options{Addr: os.Getenv("REDIS_URL")})
+
+// Cache-aside
+func GetUser(ctx context.Context, id string, db *DB) (*User, error) {
+    cached, err := rdb.Get(ctx, "user:"+id).Result()
+    if err == nil {
+        var u User
+        json.Unmarshal([]byte(cached), &u)
+        return &u, nil
+    }
+    user, err := db.FindUser(ctx, id)
+    if err != nil { return nil, err }
+    data, _ := json.Marshal(user)
+    rdb.SetEx(ctx, "user:"+id, data, 5*time.Minute)
+    return user, nil
+}
+
+// Atomic rate limiter using INCR + EXPIRE
+func RateLimit(ctx context.Context, ip string, limit int) (bool, error) {
+    key := "rl:" + ip
+    count, err := rdb.Incr(ctx, key).Result()
+    if count == 1 { rdb.Expire(ctx, key, time.Minute) }
+    return count <= int64(limit), err
+}`,
+    },
+  },
+  {
+    id: "go-asynq",
+    name: "asynq",
+    category: "queue",
+    description: "Simple, reliable, and efficient distributed task queue backed by Redis. Retries, scheduling, and a web UI.",
+    docsUrl: "https://github.com/hibiken/asynq",
+    packageName: "github.com/hibiken/asynq",
+    snippet: {
+      lang: "go",
+      install: "go get github.com/hibiken/asynq",
+      code: `import "github.com/hibiken/asynq"
+
+// Producer — enqueue tasks
+client := asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("REDIS_URL")})
+
+task, _ := asynq.NewTask("email:welcome", payload, asynq.MaxRetry(3), asynq.Timeout(30*time.Second))
+client.Enqueue(task, asynq.Queue("critical"), asynq.ProcessIn(5*time.Second))
+
+// Consumer — process tasks in a worker binary
+srv := asynq.NewServer(asynq.RedisClientOpt{Addr: os.Getenv("REDIS_URL")},
+    asynq.Config{Concurrency: 10, Queues: map[string]int{"critical": 6, "default": 3}})
+
+mux := asynq.NewServeMux()
+mux.HandleFunc("email:welcome", func(ctx context.Context, t *asynq.Task) error {
+    var p WelcomeEmailPayload
+    json.Unmarshal(t.Payload(), &p)
+    return emailService.SendWelcome(ctx, p.UserID)
+})
+srv.Run(mux)`,
+    },
+  },
+  {
+    id: "go-minio",
+    name: "MinIO / S3 (aws-sdk-go)",
+    category: "storage",
+    description: "S3-compatible object storage with Go SDK. Presigned URLs, multipart uploads, and bucket lifecycle — works with AWS S3, R2, and MinIO.",
+    docsUrl: "https://github.com/aws/aws-sdk-go-v2",
+    packageName: "github.com/aws/aws-sdk-go-v2/service/s3",
+    snippet: {
+      lang: "go",
+      install: "go get github.com/aws/aws-sdk-go-v2/config github.com/aws/aws-sdk-go-v2/service/s3",
+      code: `import (
+    "github.com/aws/aws-sdk-go-v2/aws"
+    "github.com/aws/aws-sdk-go-v2/config"
+    "github.com/aws/aws-sdk-go-v2/service/s3"
+    "github.com/aws/aws-sdk-go-v2/service/s3/presign"
+)
+
+cfg, _ := config.LoadDefaultConfig(context.TODO(), config.WithRegion(os.Getenv("AWS_REGION")))
+s3Client := s3.NewFromConfig(cfg)
+presignClient := presign.NewPresignClient(s3Client)
+
+// Generate presigned upload URL (client uploads directly)
+func PresignUpload(ctx context.Context, bucket, key string) (string, error) {
+    req, err := presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
+        Bucket: aws.String(bucket), Key: aws.String(key),
+    }, presign.WithPresignExpires(5*time.Minute))
+    if err != nil { return "", err }
+    return req.URL, nil
+}`,
+    },
+  },
+];
 
 export const backendArea: SkillAreaData = {
   id: "backend",
@@ -87,6 +1425,7 @@ export const backendArea: SkillAreaData = {
         { id: "nd-pool", label: "Database connection pooling (not new connection per request)" },
         { id: "nd-graceful", label: "Graceful shutdown: drain connections on SIGTERM" },
       ],
+      services: nodeServices,
     },
     {
       id: "aspnet",
@@ -154,6 +1493,7 @@ export const backendArea: SkillAreaData = {
         { id: "as-cors", label: "CORS policy explicitly configured — no AllowAnyOrigin in prod" },
         { id: "as-problem", label: "Returns RFC 7807 ProblemDetails for errors (UseExceptionHandler)" },
       ],
+      services: aspnetServices,
     },
     {
       id: "php",
@@ -221,6 +1561,7 @@ export const backendArea: SkillAreaData = {
         { id: "ph-cache", label: "Route and config cached in production (php artisan optimize)" },
         { id: "ph-logs", label: "Structured logging via Monolog (Laravel Log facade)" },
       ],
+      services: phpServices,
     },
     {
       id: "python",
@@ -288,6 +1629,7 @@ export const backendArea: SkillAreaData = {
         { id: "py-uvicorn", label: "Production: gunicorn + uvicorn workers (not uvicorn alone)" },
         { id: "py-secrets", label: "Secrets via environment variables — never hardcoded" },
       ],
+      services: pythonServices,
     },
     {
       id: "go",
@@ -355,6 +1697,7 @@ export const backendArea: SkillAreaData = {
         { id: "go-tidy", label: "go mod tidy run — go.sum committed and up to date" },
         { id: "go-bench", label: "Critical paths benchmarked with go test -bench" },
       ],
+      services: goServices,
     },
   ],
 };
